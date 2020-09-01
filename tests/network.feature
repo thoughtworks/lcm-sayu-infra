@@ -84,3 +84,11 @@ Feature: This module should create all resources for Network
         Given I have aws_security_group resource configured
         When its name is "lcm-sayu-sg-task"
         And it has ingress
+
+    Scenario: ALB should be created
+        Given I have aws_lb resource configured
+        When its name is "lcm-sayu-alb"
+        And its internal is false
+        And its load_balancer_type is "application"
+        And its enable_deletion_protection is false
+    

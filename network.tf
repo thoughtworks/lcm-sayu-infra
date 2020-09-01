@@ -147,3 +147,13 @@ resource "aws_security_group" "ecs_tasks" {
    ipv6_cidr_blocks = ["::/0"]
   }
 }
+
+# Create ALB
+resource "aws_lb" "main" {
+  name               = "${var.app_name}-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = [aws_subnet.public.id]
+  enable_deletion_protection = false
+}

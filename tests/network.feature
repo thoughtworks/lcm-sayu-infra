@@ -92,3 +92,20 @@ Feature: This module should create all resources for Network
         And its load_balancer_type is "application"
         And its enable_deletion_protection is false
     
+    Scenario: ALB Target Group should be created
+        Given I have aws_alb_target_group resource configured
+        When its name is "lcm-sayu-tg"
+        And its port is 80
+        And its protocol is "HTTP"
+        And its target_type is "ip"
+        Then it must contain health_check
+        And its protocol must be "HTTP"
+
+
+    Scenario: ALB Listener to HTTP should be created
+        Given I have aws_alb_listener resource configured
+        When its name is "http"
+        And its port is 80
+        And its protocol is "HTTP"
+        Then it must contain default_action
+        And its type must be "redirect"

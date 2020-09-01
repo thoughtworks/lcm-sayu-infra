@@ -11,13 +11,20 @@ resource "aws_vpc" "main" {
 # Internet gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "lcm-sayu-igw"
+  }
 }
+
 # Public Subnet
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.aws_public_subnet_cidr_block
   availability_zone       = var.aws_zone
   map_public_ip_on_launch = true
+  tags = {
+    Name = "lcm-sayu-public-subnet"
+  }
 }
 
 # Private Subnet
@@ -25,4 +32,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.aws_private_subnet_cidr_block
   availability_zone = var.aws_zone
+  tags = {
+    Name = "lcm-sayu-private-subnet"
+  }
 }

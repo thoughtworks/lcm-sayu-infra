@@ -14,3 +14,4 @@ variable "aws_public_subnet_cidr_block" {}
 variable "aws_private_subnet_cidr_block" {}
 variable "aws_sg_alb_ingress_insecure_port" {}
 variable "aws_sg_alb_ingress_secure_port" {}
+variable "container_port" {}

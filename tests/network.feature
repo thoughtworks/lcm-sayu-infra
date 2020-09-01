@@ -57,24 +57,30 @@ Feature: This module should create all resources for Network
         Given I have aws_nat_gateway resource configured
         When its name is "main"
 
-     Scenario: Route table to private subnet should be created
+    Scenario: Route table to private subnet should be created
         Given I have aws_route_table resource configured
         When its name is "private"
         And its type is "aws_route_table"
 
-     Scenario: Route to private subnet should be created
+    Scenario: Route to private subnet should be created
         Given I have aws_route resource configured
         When its name is "private"
         And its type is "aws_route"
         And its destination_cidr_block is "0.0.0.0/0"
     
-     Scenario: Route table association to private subnet should be created
+    Scenario: Route table association to private subnet should be created
         Given I have aws_route_table_association resource configured
         When its name is "private"
         And its type is "aws_route_table_association"
     
-      Scenario: Security Group should be created
+    Scenario: Security Group to ALB should be created
         Given I have aws_security_group resource configured
         When its name is "lcm-sayu-sg-alb"
         And it has ingress
         And it has egress
+        
+        
+    Scenario: Security Group to ECS Task should be created
+        Given I have aws_security_group resource configured
+        When its name is "lcm-sayu-sg-task"
+        And it has ingress

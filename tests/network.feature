@@ -4,7 +4,9 @@ Feature: This module should create all resources for Network
         Given I have aws_vpc resource configured
         When its name is "main"
         And its type is "aws_vpc"
-        Then its cidr_block must be "10.0.0.0/16"
+        And its cidr_block is "10.0.0.0/16"
+        Then it must contain tags
+        And its name must be "lcm-sayu-vpc"
 
     Scenario: Internet Gateway should be created
         Given I have aws_internet_gateway resource configured
@@ -24,3 +26,4 @@ Feature: This module should create all resources for Network
         When its name is "private"
         And its cidr_block is "10.0.1.0/24"
         And its availability_zone is "us-west-2a"
+

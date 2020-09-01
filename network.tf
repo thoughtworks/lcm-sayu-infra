@@ -4,7 +4,7 @@
 resource "aws_vpc" "main" {
   cidr_block = var.aws_vpc_cidr_block
   tags = {
-    Name = "lcm-sayu-vpc"
+    Name = "${var.app_name}-vpc"
   }
 }
 
@@ -12,7 +12,7 @@ resource "aws_vpc" "main" {
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "lcm-sayu-igw"
+    Name = "${var.app_name}-igw"
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_subnet" "public" {
   availability_zone       = var.aws_zone
   map_public_ip_on_launch = true
   tags = {
-    Name = "lcm-sayu-public-subnet"
+    Name = "${var.app_name}-public-subnet"
   }
 }
 
@@ -33,13 +33,16 @@ resource "aws_subnet" "private" {
   cidr_block        = var.aws_private_subnet_cidr_block
   availability_zone = var.aws_zone
   tags = {
-    Name = "lcm-sayu-private-subnet"
+    Name = "${var.app_name}-private-subnet"
   }
 }
 
 # Route table for public subnet, going through the internet gateway
  resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "${var.app_name}-route-table-public"
+  }
 }
 
 resource "aws_route" "public" {
@@ -56,19 +59,29 @@ resource "aws_route" "public" {
 # Attach NAT gateway to private subnet
 resource "aws_eip" "nat" {
   vpc = true
+
+  tags = {
+    Name = "${var.app_name}-eip"
+  }
 }
 
 resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.private.id
   depends_on    = [aws_internet_gateway.main]
+
+  tags = {
+    Name = "${var.app_name}-nat-gateway"
+  }
 }
 
 #Route table for private subnet, where traffic is routed through the NAT gateway
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  
+   tags = {
+    Name = "${var.app_name}-route-table-private"
+  }
 }
 
 resource "aws_route" "private" {

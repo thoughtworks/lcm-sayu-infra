@@ -11,4 +11,7 @@ variable "aws_region" {}
 variable "aws_zone" {}
 variable "aws_vpc_cidr_block" {}
 variable "aws_public_subnet_cidr_block" {}
+variable "aws_private_subnet_cidr_block" {}
+
+
 

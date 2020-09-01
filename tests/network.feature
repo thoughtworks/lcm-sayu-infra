@@ -31,4 +31,20 @@ Feature: This module should create all resources for Network
         And its availability_zone is "us-west-2a"
         Then it must contain tags
         And its name must be "lcm-sayu-private-subnet"
+    
+    Scenario: Route table should be created
+        Given I have aws_route_table resource configured
+        When its name is "public"
+        And its type is "aws_route_table"
+
+    Scenario: Route should be created
+        Given I have aws_route resource configured
+        When its name is "public"
+        And its type is "aws_route"
+        And its destination_cidr_block is "0.0.0.0/0"
+
+    Scenario: Route table association should be created
+        Given I have aws_route_table_association resource configured
+        When its name is "public"
+        And its type is "aws_route_table_association"
 

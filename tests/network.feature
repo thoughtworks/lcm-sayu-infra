@@ -32,18 +32,18 @@ Feature: This module should create all resources for Network
         Then it must contain tags
         And its name must be "lcm-sayu-private-subnet"
     
-    Scenario: Route table should be created
+    Scenario: Route table to public subnet should be created
         Given I have aws_route_table resource configured
         When its name is "public"
         And its type is "aws_route_table"
 
-    Scenario: Route should be created
+    Scenario: Route to public subnet should be created
         Given I have aws_route resource configured
         When its name is "public"
         And its type is "aws_route"
         And its destination_cidr_block is "0.0.0.0/0"
 
-    Scenario: Route table association should be created
+    Scenario: Route table association to public subnet should be created
         Given I have aws_route_table_association resource configured
         When its name is "public"
         And its type is "aws_route_table_association"
@@ -56,4 +56,19 @@ Feature: This module should create all resources for Network
     Scenario: NAT Gateway should be created
         Given I have aws_nat_gateway resource configured
         When its name is "main"
+
+     Scenario: Route table to private subnet should be created
+        Given I have aws_route_table resource configured
+        When its name is "private"
+        And its type is "aws_route_table"
+
+     Scenario: Route to private subnet should be created
+        Given I have aws_route resource configured
+        When its name is "private"
+        And its type is "aws_route"
+        And its destination_cidr_block is "0.0.0.0/0"
     
+     Scenario: Route table association to private subnet should be created
+        Given I have aws_route_table_association resource configured
+        When its name is "private"
+        And its type is "aws_route_table_association"

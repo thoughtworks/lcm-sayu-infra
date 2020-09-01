@@ -68,6 +68,7 @@ resource "aws_nat_gateway" "main" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
+  
 }
 
 resource "aws_route" "private" {
@@ -79,4 +80,35 @@ resource "aws_route" "private" {
 resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
+}
+
+
+# Create security group to ALB
+resource "aws_security_group" "alb" {
+  name   = "${var.app_name}-sg-alb"
+  vpc_id = aws_vpc.main.id
+ 
+  ingress {
+   protocol         = "tcp"
+   from_port        = var.aws_sg_alb_ingress_insecure_port
+   to_port          = var.aws_sg_alb_ingress_insecure_port
+   cidr_blocks      = ["0.0.0.0/0"]
+   ipv6_cidr_blocks = ["::/0"]
+  }
+ 
+  ingress {
+   protocol         = "tcp"
+   from_port        = var.aws_sg_alb_ingress_secure_port
+   to_port          = var.aws_sg_alb_ingress_secure_port
+   cidr_blocks      = ["0.0.0.0/0"]
+   ipv6_cidr_blocks = ["::/0"]
+  }
+ 
+  egress {
+   protocol         = "-1"
+   from_port        = 0
+   to_port          = 0
+   cidr_blocks      = ["0.0.0.0/0"]
+   ipv6_cidr_blocks = ["::/0"]
+  }
 }

@@ -72,3 +72,9 @@ Feature: This module should create all resources for Network
         Given I have aws_route_table_association resource configured
         When its name is "private"
         And its type is "aws_route_table_association"
+    
+      Scenario: Security Group should be created
+        Given I have aws_security_group resource configured
+        When its name is "lcm-sayu-sg-alb"
+        And it has ingress
+        And it has egress

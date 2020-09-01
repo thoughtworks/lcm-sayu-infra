@@ -48,3 +48,12 @@ Feature: This module should create all resources for Network
         When its name is "public"
         And its type is "aws_route_table_association"
 
+    Scenario: Elastic IP should be created
+        Given i have aws_eip resource configured
+        When its name is "nat"
+        And its vpc is true
+    
+    Scenario: NAT Gateway should be created
+        Given I have aws_nat_gateway resource configured
+        When its name is "main"
+    

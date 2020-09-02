@@ -19,8 +19,9 @@ resource "aws_internet_gateway" "main" {
 # Public Subnet
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.aws_public_subnet_cidr_block
-  availability_zone       = var.aws_zone
+  cidr_block              = element(var.public_subnets, count.index)
+  availability_zone       = element(var.availability_zones, count.index)
+  count                   = length(var.public_subnets)
   map_public_ip_on_launch = true
   tags = {
     Name = "${var.app_name}-public-subnet"
@@ -30,8 +31,9 @@ resource "aws_subnet" "public" {
 # Private Subnet
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.aws_private_subnet_cidr_block
-  availability_zone = var.aws_zone
+  cidr_block        = element(var.private_subnets, count.index)
+  availability_zone = element(var.availability_zones, count.index)
+  count             = length(var.private_subnets)
   tags = {
     Name = "${var.app_name}-private-subnet"
   }
@@ -52,12 +54,14 @@ resource "aws_route" "public" {
 }
  
  resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
+  count          = length(var.public_subnets)
+  subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id = aws_route_table.public.id
 }
-
+ 
 # Attach NAT gateway to private subnet
 resource "aws_eip" "nat" {
+  count = length(var.private_subnets)
   vpc = true
 
   tags = {
@@ -66,8 +70,9 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.private.id
+  count         = length(var.private_subnets)
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.public.*.id, count.index)
   depends_on    = [aws_internet_gateway.main]
 
   tags = {
@@ -78,6 +83,7 @@ resource "aws_nat_gateway" "main" {
 #Route table for private subnet, where traffic is routed through the NAT gateway
 
 resource "aws_route_table" "private" {
+  count  = length(var.private_subnets)
   vpc_id = aws_vpc.main.id
    tags = {
     Name = "${var.app_name}-route-table-private"
@@ -85,14 +91,16 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route" "private" {
-  route_table_id         = aws_route_table.private.id
+  count                  = length(compact(var.private_subnets))
+  route_table_id         = element(aws_route_table.private.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.main.id
+  nat_gateway_id         = element(aws_nat_gateway.main.*.id, count.index)
 }
 
 resource "aws_route_table_association" "private" {
-  subnet_id      = aws_subnet.private.id
-  route_table_id = aws_route_table.private.id
+  count          = length(var.private_subnets)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = element(aws_route_table.private.*.id, count.index)
 }
 
 
@@ -126,7 +134,6 @@ resource "aws_security_group" "alb" {
   }
 }
 # Security group to ECS Task
-
 resource "aws_security_group" "ecs_tasks" {
   name   = "${var.app_name}-sg-task"
   vpc_id = aws_vpc.main.id
@@ -154,7 +161,7 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = [aws_subnet.public.id]
+  subnets            = aws_subnet.public.*.id
   enable_deletion_protection = false
 }
 
@@ -191,3 +198,4 @@ resource "aws_alb_listener" "http" {
    }
   }
 }
+

@@ -10,8 +10,6 @@ variable "app_environment" {
 variable "aws_region" {}
 variable "aws_zone" {}
 variable "aws_vpc_cidr_block" {}
-variable "aws_public_subnet_cidr_block" {}
-variable "aws_private_subnet_cidr_block" {}
 variable "aws_sg_alb_ingress_insecure_port" {}
 variable "aws_sg_alb_ingress_secure_port" {}
 variable "container_port" {}
@@ -19,3 +17,8 @@ variable "health_check_path" {
   description = "Http path for task health check"
   default     = "/health"
 }
+
+
+variable "availability_zones" {}
+variable "private_subnets" {}
+variable "public_subnets" {}

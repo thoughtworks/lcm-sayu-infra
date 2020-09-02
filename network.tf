@@ -199,3 +199,30 @@ resource "aws_alb_listener" "http" {
   }
 }
 
+# Create ECR Repository 
+resource "aws_ecr_repository" "main" {
+  name                 = "${var.app_name}-repository"
+  image_tag_mutability = "MUTABLE"
+}
+
+# Create ECR lifecycle policy
+resource "aws_ecr_lifecycle_policy" "main" {
+  repository = aws_ecr_repository.main.name
+ 
+  policy = jsonencode({
+   rules = [{
+     rulePriority = 1
+     description  = "keep last 10 images"
+     action       = {
+       type = "expire"
+     }
+     selection     = {
+       tagStatus   = "any"
+       countType   = "imageCountMoreThan"
+       countNumber = 10
+     }
+   }]
+  })
+}
+
+

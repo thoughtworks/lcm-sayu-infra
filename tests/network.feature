@@ -109,3 +109,14 @@ Feature: This module should create all resources for Network
         And its protocol is "HTTP"
         Then it must contain default_action
         And its type must be "redirect"
+
+    Scenario: ECR repository should be created
+        Given I have aws_ecr_repository resource configured
+        When its name is "lcm-sayu-repository"
+        And its image_tag_mutability is "MUTABLE" 
+    
+    Scenario: ECR lifecycle policy should be created
+        Given I have aws_ecr_lifecycle_policy resource configured
+        When its name is "main"
+        And it has repository
+        And it has policy

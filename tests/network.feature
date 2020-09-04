@@ -22,7 +22,7 @@ Feature: This module should create all resources for Network
         And its availability_zone is "us-west-2a"
         And its map_public_ip_on_launch is true
         Then it must contain tags
-        And its name must be "lcm-sayu-public-subnet"
+        And its name must be "lcm-sayu-public-subnet-\d"
 
     Scenario: Private subnet should be created
         Given I have aws_subnet resource configured
@@ -30,7 +30,7 @@ Feature: This module should create all resources for Network
         And its cidr_block is "10.0.0.0/24"
         And its availability_zone is "us-west-2a"
         Then it must contain tags
-        And its name must be "lcm-sayu-private-subnet"
+        And its name must be "lcm-sayu-private-subnet-\d"
     
     Scenario: Route table to public subnet should be created
         Given I have aws_route_table resource configured
@@ -108,7 +108,7 @@ Feature: This module should create all resources for Network
         And its port is 80
         And its protocol is "HTTP"
         Then it must contain default_action
-        And its type must be "redirect"
+        And its type must be "forward"
 
     Scenario: ECR repository should be created
         Given I have aws_ecr_repository resource configured
@@ -120,3 +120,40 @@ Feature: This module should create all resources for Network
         When its name is "main"
         And it has repository
         And it has policy
+
+    Scenario: ECS cluster should be created
+        Given I have aws_ecs_cluster resource configured
+        When its name is "lcm-sayu-cluster"
+    
+    Scenario: AWS iam role should be created
+        Given I have aws_iam_role resource configured
+        When its name is "lcm-sayu-ecsTaskExecutionRole"
+
+    Scenario: AWS iam role policy attachment should be created
+        Given I have aws_iam_role_policy_attachment resource configured
+        When its name is "ecs-task-execution-role-policy-attachment"
+    
+    Scenario: ECS Task definition should be created
+        Given I have aws_ecs_task_definition resource configured
+        When its name is "main"
+        And its network_mode is "awsvpc"
+        And it has requires_compatibilities
+        And it has execution_role_arn
+        And it has container_definitions
+
+    Scenario: ECS Service should be created
+        Given I have aws_ecs_service resource configured
+        When its name is "lcm-sayu-service"
+        And it has cluster
+        And its desired_count is 2
+        And its deployment_minimum_healthy_percent is 50
+        And its deployment_maximum_percent is 200
+        And its launch_type is "FARGATE"
+        And its scheduling_strategy is "REPLICA"
+        And it has network_configuration
+        Then its assign_public_ip must be false 
+
+
+
+
+    

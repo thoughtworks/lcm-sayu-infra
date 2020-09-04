@@ -256,6 +256,23 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+##################### DB #######################
+resource "aws_db_instance" "rds" {
+  identifier             = "${var.app_name}-database"
+  allocated_storage      = var.allocated_storage
+  engine                 = "postgres"
+  engine_version         = "9.6.6"
+  instance_class         = var.instance_class
+  name                   = var.database_name
+  username               = var.database_username
+  password               = var.database_password
+  db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.id
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  skip_final_snapshot    = true
+  tags = {
+    Environment = var.environment
+  }
+}
 
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.app_name}-task"
@@ -268,7 +285,13 @@ resource "aws_ecs_task_definition" "main" {
     name        = "${var.app_name}-container"
     image       = "${var.container_image}:latest"
     essential   = true
-    environment = var.container_environment
+    environment = [
+      {"name": "DATABASE_ENDPOINT", "value": aws_db_instance.rds.endpoint},
+      {"name": "DATABASE_PORT", "value": "5432"},
+      {"name": "DATABASE_PASSWORD", "value": var.database_password },
+      {"name": "DATABASE_USERNAME", "value": var.database_username },
+      {"name": "DATABASE_NAME", "value": var.database_name }
+    ]
     portMappings = [{
       protocol      = "tcp"
       containerPort = var.container_port
@@ -280,6 +303,7 @@ resource "aws_ecs_task_definition" "main" {
     Name        = "${var.app_name}-task"
     Environment = var.environment
   }
+  depends_on = [aws_db_instance.rds]
 }
 
 resource "aws_ecs_service" "main" {
@@ -343,22 +367,5 @@ resource "aws_security_group" "rds_sg" {
     to_port = 0
     protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_db_instance" "rds" {
-  identifier             = "${var.app_name}-database"
-  allocated_storage      = var.allocated_storage
-  engine                 = "postgres"
-  engine_version         = "9.6.6"
-  instance_class         = var.instance_class
-  name                   = var.database_name
-  username               = var.database_username
-  password               = var.database_password
-  db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.id
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  skip_final_snapshot    = true
-  tags = {
-    Environment = var.environment
   }
 }

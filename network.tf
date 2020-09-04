@@ -256,6 +256,20 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+
+resource "random_password" "password" {
+  length = 16
+  special = true
+  override_special = "_%@"
+}
+
+resource "random_string" "random" {
+  length = 16
+  special = true
+  override_special = "_%@"
+}
+
+
 ##################### DB #######################
 resource "aws_db_instance" "rds" {
   identifier             = "${var.app_name}-database"
@@ -264,8 +278,8 @@ resource "aws_db_instance" "rds" {
   engine_version         = "9.6.6"
   instance_class         = var.instance_class
   name                   = var.database_name
-  username               = var.database_username
-  password               = var.database_password
+  username               = random_string.random.result
+  password               = random_password.password.result
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.id
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
@@ -288,8 +302,8 @@ resource "aws_ecs_task_definition" "main" {
     environment = [
       {"name": "DATABASE_ENDPOINT", "value": aws_db_instance.rds.endpoint},
       {"name": "DATABASE_PORT", "value": "5432"},
-      {"name": "DATABASE_PASSWORD", "value": var.database_password },
-      {"name": "DATABASE_USERNAME", "value": var.database_username },
+      {"name": "DATABASE_PASSWORD", "value": random_password.password.result},
+      {"name": "DATABASE_USERNAME", "value": random_string.random.result },
       {"name": "DATABASE_NAME", "value": var.database_name }
     ]
     portMappings = [{

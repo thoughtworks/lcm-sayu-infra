@@ -15,7 +15,4 @@ container_memory = 512
 
 allocated_storage = 20
 instance_class = "db.t2.micro"
-
 database_name = "lcmsayudb"
-database_username = ""
-database_password = ""

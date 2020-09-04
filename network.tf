@@ -18,13 +18,13 @@ resource "aws_internet_gateway" "main" {
 
 # Public Subnet
 resource "aws_subnet" "public" {
+  count                   = length(var.public_subnets)
   vpc_id                  = aws_vpc.main.id
   cidr_block              = element(var.public_subnets, count.index)
   availability_zone       = element(var.availability_zones, count.index)
-  count                   = length(var.public_subnets)
   map_public_ip_on_launch = true
   tags = {
-    Name = "${var.app_name}-public-subnet"
+    Name = "${var.app_name}-public-subnet-${count.index}"
   }
 }
 
@@ -35,37 +35,40 @@ resource "aws_subnet" "private" {
   availability_zone = element(var.availability_zones, count.index)
   count             = length(var.private_subnets)
   tags = {
-    Name = "${var.app_name}-private-subnet"
+    Name = "${var.app_name}-private-subnet-${count.index}"
   }
 }
 
 # Route table for public subnet, going through the internet gateway
  resource "aws_route_table" "public" {
+  count  = length(var.public_subnets)
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.app_name}-route-table-public"
+    Name = "${var.app_name}-route-table-public-${count.index}"
   }
 }
 
 resource "aws_route" "public" {
-  route_table_id         = aws_route_table.public.id
+  count                  = length(compact(var.public_subnets))
+  route_table_id         = element(aws_route_table.public.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.main.id
+  gateway_id             = element(aws_internet_gateway.main.*.id, count.index)
 }
- 
+
+
  resource "aws_route_table_association" "public" {
   count          = length(var.public_subnets)
   subnet_id      = element(aws_subnet.public.*.id, count.index)
-  route_table_id = aws_route_table.public.id
+  route_table_id =  element(aws_route_table.public.*.id, count.index)
 }
+
  
 # Attach NAT gateway to private subnet
 resource "aws_eip" "nat" {
   count = length(var.private_subnets)
   vpc = true
-
   tags = {
-    Name = "${var.app_name}-eip"
+    Name = "${var.app_name}-eip-${count.index}"
   }
 }
 
@@ -76,7 +79,7 @@ resource "aws_nat_gateway" "main" {
   depends_on    = [aws_internet_gateway.main]
 
   tags = {
-    Name = "${var.app_name}-nat-gateway"
+    Name = "${var.app_name}-nat-gateway-${count.index}"
   }
 }
 
@@ -86,7 +89,7 @@ resource "aws_route_table" "private" {
   count  = length(var.private_subnets)
   vpc_id = aws_vpc.main.id
    tags = {
-    Name = "${var.app_name}-route-table-private"
+    Name = "${var.app_name}-route-table-private-${count.index}"
   }
 }
 
@@ -102,7 +105,6 @@ resource "aws_route_table_association" "private" {
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
 }
-
 
 # Create security group to ALB
 resource "aws_security_group" "alb" {
@@ -171,6 +173,7 @@ resource "aws_alb_target_group" "main" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
+  depends_on = [aws_lb.main] 
  
   health_check {
    healthy_threshold   = "3"
@@ -181,6 +184,7 @@ resource "aws_alb_target_group" "main" {
    path                = var.health_check_path
    unhealthy_threshold = "2"
   }
+
 }
 
 resource "aws_alb_listener" "http" {
@@ -189,13 +193,8 @@ resource "aws_alb_listener" "http" {
   protocol          = "HTTP"
  
   default_action {
-   type = "redirect"
- 
-   redirect {
-     port        = 443
-     protocol    = "HTTPS"
-     status_code = "HTTP_301"
-   }
+    target_group_arn = aws_alb_target_group.main.id
+    type             = "forward"
   }
 }
 
@@ -203,7 +202,9 @@ resource "aws_alb_listener" "http" {
 resource "aws_ecr_repository" "main" {
   name                 = "${var.app_name}-repository"
   image_tag_mutability = "MUTABLE"
+
 }
+
 
 # Create ECR lifecycle policy
 resource "aws_ecr_lifecycle_policy" "main" {
@@ -225,4 +226,85 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
+ # Create ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "${var.app_name}-cluster"
+}
 
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "${var.app_name}-ecsTaskExecutionRole"
+ 
+  assume_role_policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": "sts:AssumeRole",
+     "Principal": {
+       "Service": "ecs-tasks.amazonaws.com"
+     },
+     "Effect": "Allow",
+     "Sid": ""
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_ecs_task_definition" "main" {
+  family                   = "${var.app_name}-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.container_cpu
+  memory                   = var.container_memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  container_definitions = jsonencode([{
+    name        = "${var.app_name}-container"
+    image       = "${var.container_image}:latest"
+    essential   = true
+    environment = var.container_environment
+    portMappings = [{
+      protocol      = "tcp"
+      containerPort = var.container_port
+      hostPort      = var.container_port
+    }]
+  }])
+
+  tags = {
+    Name        = "${var.app_name}-task"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ecs_service" "main" {
+ name                               = "${var.app_name}-service"
+ cluster                            = aws_ecs_cluster.main.id
+ task_definition                    = aws_ecs_task_definition.main.arn
+ desired_count                      = 2
+ deployment_minimum_healthy_percent = 50
+ deployment_maximum_percent         = 200
+ launch_type                        = "FARGATE"
+ scheduling_strategy                = "REPLICA"
+ 
+ network_configuration {
+   security_groups  = [aws_security_group.ecs_tasks.id]
+   subnets          = aws_subnet.public.*.id
+   assign_public_ip = false
+ }
+ 
+ load_balancer {
+   target_group_arn = aws_alb_target_group.main.arn
+   container_name   = "${var.app_name}-container"
+   container_port   = var.container_port
+ }
+ 
+ lifecycle {
+   ignore_changes = [task_definition, desired_count]
+ }
+}

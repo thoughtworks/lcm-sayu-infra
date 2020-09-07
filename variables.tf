@@ -35,5 +35,4 @@ variable "container_cpu" {}
 variable "container_memory" {}
 variable "allocated_storage" {}
 variable "instance_class" {}
-
 variable "database_name" {}

@@ -265,8 +265,8 @@ resource "random_password" "password" {
 
 resource "random_string" "random" {
   length = 16
-  special = true
-  override_special = "_%@"
+  special = false
+  number = false
 }
 
 
@@ -303,7 +303,7 @@ resource "aws_ecs_task_definition" "main" {
       {"name": "DATABASE_ENDPOINT", "value": aws_db_instance.rds.endpoint},
       {"name": "DATABASE_PORT", "value": "5432"},
       {"name": "DATABASE_PASSWORD", "value": random_password.password.result},
-      {"name": "DATABASE_USERNAME", "value": random_string.random.result },
+      {"name": "DATABASE_USERNAME", "value": random_string.random.result},
       {"name": "DATABASE_NAME", "value": var.database_name }
     ]
     portMappings = [{

@@ -2,9 +2,10 @@
 
 # Create VPC
 resource "aws_vpc" "main" {
-  cidr_block = var.aws_vpc_cidr_block
+  cidr_block = lookup(var.aws_vpc_cidr_block, terraform.workspace)
   tags = {
-    Name = "${var.app_name}-vpc"
+    Name = "${var.app_name}-vpc-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
@@ -12,44 +13,48 @@ resource "aws_vpc" "main" {
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.app_name}-igw"
+    Name = "${var.app_name}-igw-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 # Public Subnet
 resource "aws_subnet" "public" {
-  count                   = length(var.public_subnets)
+  count                   = length(lookup(var.public_subnets, terraform.workspace))
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = element(var.public_subnets, count.index)
+  cidr_block              = element(lookup(var.public_subnets, terraform.workspace), count.index)
   availability_zone       = element(var.availability_zones, count.index)
   map_public_ip_on_launch = true
   tags = {
-    Name = "${var.app_name}-public-subnet-${count.index}"
+    Name = "${var.app_name}-public-subnet-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 # Private Subnet
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = element(var.private_subnets, count.index)
+  cidr_block        = element(lookup(var.private_subnets, terraform.workspace), count.index)
   availability_zone = element(var.availability_zones, count.index)
-  count             = length(var.private_subnets)
+  count             = length(lookup(var.private_subnets, terraform.workspace))
   tags = {
-    Name = "${var.app_name}-private-subnet-${count.index}"
+    Name = "${var.app_name}-private-subnet-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 # Route table for public subnet, going through the internet gateway
  resource "aws_route_table" "public" {
-  count  = length(var.public_subnets)
+  count  = length(lookup(var.public_subnets, terraform.workspace))
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.app_name}-route-table-public-${count.index}"
+    Name = "${var.app_name}-route-table-public-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_route" "public" {
-  count                  = length(compact(var.public_subnets))
+  count                  = length(compact(lookup(var.public_subnets, terraform.workspace)))
   route_table_id         = element(aws_route_table.public.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = element(aws_internet_gateway.main.*.id, count.index)
@@ -57,7 +62,7 @@ resource "aws_route" "public" {
 
 
  resource "aws_route_table_association" "public" {
-  count          = length(var.public_subnets)
+  count          = length(lookup(var.public_subnets, terraform.workspace))
   subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id =  element(aws_route_table.public.*.id, count.index)
 }
@@ -65,50 +70,53 @@ resource "aws_route" "public" {
  
 # Attach NAT gateway to private subnet
 resource "aws_eip" "nat" {
-  count = length(var.private_subnets)
+  count = length(lookup(var.private_subnets, terraform.workspace))
   vpc = true
   tags = {
-    Name = "${var.app_name}-eip-${count.index}"
+    Name = "${var.app_name}-eip-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_nat_gateway" "main" {
-  count         = length(var.private_subnets)
+  count         = length(lookup(var.private_subnets, terraform.workspace))
   allocation_id = element(aws_eip.nat.*.id, count.index)
   subnet_id     = element(aws_subnet.public.*.id, count.index)
   depends_on    = [aws_internet_gateway.main]
 
   tags = {
-    Name = "${var.app_name}-nat-gateway-${count.index}"
+    Name = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 # Route table for private subnet, where traffic is routed through the NAT gateway
 
 resource "aws_route_table" "private" {
-  count  = length(var.private_subnets)
+  count  = length(lookup(var.private_subnets, terraform.workspace))
   vpc_id = aws_vpc.main.id
    tags = {
-    Name = "${var.app_name}-route-table-private-${count.index}"
+    Name = "${var.app_name}-route-table-private-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_route" "private" {
-  count                  = length(compact(var.private_subnets))
+  count                  = length(compact(lookup(var.private_subnets, terraform.workspace)))
   route_table_id         = element(aws_route_table.private.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = element(aws_nat_gateway.main.*.id, count.index)
 }
 
 resource "aws_route_table_association" "private" {
-  count          = length(var.private_subnets)
+  count          = length(lookup(var.private_subnets, terraform.workspace))
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
 }
 
 # Create security group to ALB
 resource "aws_security_group" "alb" {
-  name   = "${var.app_name}-sg-alb"
+  name   = "${var.app_name}-sg-alb-${terraform.workspace}"
   vpc_id = aws_vpc.main.id
  
   ingress {
@@ -134,10 +142,14 @@ resource "aws_security_group" "alb" {
    cidr_blocks      = ["0.0.0.0/0"]
    ipv6_cidr_blocks = ["::/0"]
   }
+  tags = {
+    Name = "${var.app_name}-sg-alb-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
+  }
 }
 # Security group to ECS Task
 resource "aws_security_group" "ecs_tasks" {
-  name   = "${var.app_name}-sg-task"
+  name   = "${var.app_name}-sg-task-${terraform.workspace}"
   vpc_id = aws_vpc.main.id
  
   ingress {
@@ -159,7 +171,7 @@ resource "aws_security_group" "ecs_tasks" {
 
 # Create ALB
 resource "aws_lb" "main" {
-  name               = "${var.app_name}-alb"
+  name               = "${var.app_name}-alb-${terraform.workspace}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
@@ -168,7 +180,7 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_alb_target_group" "main" {
-  name        = "${var.app_name}-tg"
+  name        = "${var.app_name}-tg-${terraform.workspace}"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
@@ -200,9 +212,12 @@ resource "aws_alb_listener" "http" {
 
 # Create ECR Repository 
 resource "aws_ecr_repository" "main" {
-  name                 = "${var.app_name}-repository"
+  name                 = "${var.app_name}-repository-${terraform.workspace}"
   image_tag_mutability = "MUTABLE"
 
+  tags = {
+    Environment = "${terraform.workspace}"
+  }
 }
 
 
@@ -228,12 +243,17 @@ resource "aws_ecr_lifecycle_policy" "main" {
 
  # Create ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "${var.app_name}-cluster"
+  name = "${var.app_name}-cluster-${terraform.workspace}"
+  
+  tags = {
+    Name        = "${var.app_name}-cluster-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
+  }
 }
 
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.app_name}-ecsTaskExecutionRole"
+  name = "${var.app_name}-ecsTaskExecutionRole-${terraform.workspace}"
  
   assume_role_policy = <<EOF
 {
@@ -259,7 +279,7 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
 
 resource "random_password" "password" {
   length = 16
-  special = true
+  special = false
   override_special = "_%@"
 }
 
@@ -267,12 +287,13 @@ resource "random_string" "random" {
   length = 16
   special = false
   number = false
+  override_special = "_%@"
 }
 
 
 ##################### DB #######################
 resource "aws_db_instance" "rds" {
-  identifier             = "${var.app_name}-database"
+  identifier             = "${var.app_name}-database-${terraform.workspace}"
   allocated_storage      = var.allocated_storage
   engine                 = "postgres"
   engine_version         = "9.6.6"
@@ -284,27 +305,28 @@ resource "aws_db_instance" "rds" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   tags = {
-    Environment = var.environment
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                   = "${var.app_name}-task"
+  family                   = "${var.app_name}-task-${terraform.workspace}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([{
-    name        = "${var.app_name}-container"
-    image       = "${var.container_image}:latest"
+    name        = "${var.app_name}-container-${terraform.workspace}"
+    image       = "${var.container_image}-${terraform.workspace}:latest"
     essential   = true
     environment = [
       {"name": "DATABASE_ENDPOINT", "value": aws_db_instance.rds.endpoint},
       {"name": "DATABASE_PORT", "value": "5432"},
       {"name": "DATABASE_PASSWORD", "value": random_password.password.result},
       {"name": "DATABASE_USERNAME", "value": random_string.random.result},
-      {"name": "DATABASE_NAME", "value": var.database_name }
+      {"name": "DATABASE_NAME", "value": var.database_name },
+      {"name": "ENVIRONMENT", "value": terraform.workspace}
     ]
     portMappings = [{
       protocol      = "tcp"
@@ -314,14 +336,14 @@ resource "aws_ecs_task_definition" "main" {
   }])
 
   tags = {
-    Name        = "${var.app_name}-task"
-    Environment = var.environment
+    Name        = "${var.app_name}-task-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
   }
   depends_on = [aws_db_instance.rds]
 }
 
 resource "aws_ecs_service" "main" {
- name                               = "${var.app_name}-service"
+ name                               = "${var.app_name}-service-${terraform.workspace}"
  cluster                            = aws_ecs_cluster.main.id
  task_definition                    = aws_ecs_task_definition.main.arn
  desired_count                      = 2
@@ -338,7 +360,7 @@ resource "aws_ecs_service" "main" {
  
  load_balancer {
    target_group_arn = aws_alb_target_group.main.arn
-   container_name   = "${var.app_name}-container"
+   container_name   = "${var.app_name}-container-${terraform.workspace}"
    container_port   = var.container_port
  }
  
@@ -350,22 +372,23 @@ resource "aws_ecs_service" "main" {
 
 /* subnet used by rds */
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name        = "${var.app_name}-rds-subnet-group"
+  name        = "${var.app_name}-rds-subnet-group-${terraform.workspace}"
   description = "RDS subnet group"
   subnet_ids  = aws_subnet.private.*.id
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 
 resource "aws_security_group" "rds_sg" {
-  name = "${var.app_name}-rds-sg"
-  description = "${var.environment} Security Group"
+  name = "${var.app_name}-sg-rds-${terraform.workspace}"
+  description = "${terraform.workspace} Security Group"
   vpc_id = aws_vpc.main.id
+
   tags = {
-    Name = "${var.environment}-rds-sg"
-    Environment =  var.environment
+    Name = "${var.app_name}-sg-rds-${terraform.workspace}"
+    Environment =  "${terraform.workspace}"
   }
 
   //allow traffic for TCP 5432

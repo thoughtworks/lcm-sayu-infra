@@ -8,22 +8,24 @@ variable "environment" {
   description = "Application environment"
 }
 variable "aws_region" {}
-variable "aws_vpc_cidr_block" {}
+variable "aws_vpc_cidr_block" {
+  type = map
+}
 variable "aws_sg_alb_ingress_insecure_port" {}
 variable "aws_sg_alb_ingress_secure_port" {}
 variable "container_port" {}
 variable "health_check_path" {
   description = "Http path for task health check"
-  default     = "/health"
+  default     = "/"
 }
 
 
 variable "availability_zones" {}
 variable "private_subnets" {
-  type = list(string)
+  type = map(list(string))
 }
 variable "public_subnets" {
-   type = list(string)
+   type = map(list(string))
 }
 
 variable "container_image" {

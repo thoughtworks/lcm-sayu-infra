@@ -47,9 +47,14 @@ jobs:
 workflows:
   version: 2
   plan_approve_apply:
-    jobs:
+    jobs:  
       - plan-apply
       - apply:
+          filters:
+            branches:
+                only:
+                    - master
+                    - dev
           requires:
             - plan-apply
       - hold-destroy:

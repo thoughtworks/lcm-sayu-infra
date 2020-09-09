@@ -4,7 +4,7 @@ Feature: This module should create all resources for Network
         Given I have aws_vpc resource configured
         When its name is "main"
         And its type is "aws_vpc"
-        And its cidr_block is "10.0.0.0/16"
+        #And its cidr_block is "10.0.0.0/16"
         And it contains tags
         Then it must contain Name
         And its value must match the "^lcm-sayu-vpc-(dev|prod)$" regex

@@ -1,0 +1,38 @@
+{
+    "name": "${app_name}-container-${workspace}",
+    "image": "${container_image}-${workspace}:latest",
+    "essential": true,
+    "environment": [
+        {
+            "name": "DATABASE_ENDPOINT",
+            "value": "${endpoint_rds}"
+        },
+        {
+            "name": "DATABASE_PORT",
+            "value": "5432"
+        },
+        {
+            "name": "DATABASE_PASSWORD",
+            "value": "${random_password}"
+        },
+        {
+            "name": "DATABASE_USERNAME",
+            "value": "${random_username}"
+        },
+        {
+            "name": "DATABASE_NAME",
+            "value": "${database_name}"
+        },
+        {
+            "name": "ENVIRONMENT",
+            "value": "${workspace}"
+        }
+    ],
+    "portMappings": [
+        {
+            "protocol": "tcp",
+            "containerPort": "${container_port}",
+            "hostPort": "${container_port}"
+        }
+    ]
+}

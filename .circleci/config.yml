@@ -11,6 +11,7 @@ jobs:
           name: terraform init & plan
           command: |
             terraform init -input=false
+            terraform workspace new dev || terraform workspace select dev
             terraform plan -out terraform.out
       - persist_to_workspace:
           root: .

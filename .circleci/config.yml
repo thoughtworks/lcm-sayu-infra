@@ -58,10 +58,13 @@ workflows:
                 - pipeline
           requires:
             - plan-apply
+
+   hold_destroy:
+    jobs:  
       - hold-destroy:
           type: approval
-          requires:
-            - apply
+          #requires:
+          #  - apply
       - destroy:
           requires:
             - hold-destroy

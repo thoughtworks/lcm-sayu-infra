@@ -4,7 +4,7 @@ Feature: This module should create all resources for Network
         Given I have aws_vpc resource configured
         When its name is "main"
         And its type is "aws_vpc"
-        And its cidr_block is "10.0.0.0/16"
+        #And its cidr_block is "10.0.0.0/16"
         And it contains tags
         Then it must contain Name
         And its value must match the "^lcm-sayu-vpc-(dev|prod)$" regex
@@ -81,13 +81,13 @@ Feature: This module should create all resources for Network
     
     Scenario: Security Group to ALB should be created
         Given I have aws_security_group resource configured
-        When its address is "aws_security_group.alb"
+        When its address is "module.alb.aws_security_group.alb"
         And it contains name
         Then its value must match the "lcm-sayu-sg-alb-(dev|prod)" regex       
       
     Scenario: Security Group to ECS Task should be created
         Given I have aws_security_group resource configured
-        When its address is "aws_security_group.ecs_tasks" 
+        When its address is "module.ecs.aws_security_group.ecs_tasks" 
         And it has ingress
         And it has egress
         And its type is "aws_security_group"
@@ -97,7 +97,7 @@ Feature: This module should create all resources for Network
 
     Scenario: ALB should be created
         Given I have aws_lb resource configured
-        When its address is "aws_lb.main"
+        When its address is "module.alb.aws_lb.main"
         And its internal is false
         And its load_balancer_type is "application"
         And its enable_deletion_protection is false
@@ -107,7 +107,7 @@ Feature: This module should create all resources for Network
 
     Scenario: ALB Target Group should be created
         Given I have aws_alb_target_group resource configured
-        When its address is "aws_alb_target_group.main"
+        When its address is "module.alb.aws_alb_target_group.main"
         And its port is 80
         And its protocol is "HTTP"
         And its target_type is "ip"
@@ -125,7 +125,7 @@ Feature: This module should create all resources for Network
 
     Scenario: ECR repository should be created
         Given I have aws_ecr_repository resource configured
-        When its address is "aws_ecr_repository.main"
+        When its address is "module.ecr.aws_ecr_repository.main"
         And its image_tag_mutability is "MUTABLE" 
         When it contains name
         Then its value must match the "^lcm-sayu-repository-(dev|prod)$" regex
@@ -154,14 +154,14 @@ Feature: This module should create all resources for Network
     Scenario: ECS Task definition should be created
         Given I have aws_ecs_task_definition resource configured
         When its name is "main"
+        And its type is "aws_ecs_task_definition"
         And its network_mode is "awsvpc"
         And it has requires_compatibilities
         And it has execution_role_arn
-        And it has container_definitions
 
     Scenario: ECS Service should be created
         Given I have aws_ecs_service resource configured
-        When its address is "aws_ecs_service.main"
+        When its address is "module.ecs.aws_ecs_service.main"
         And it has cluster
         And its desired_count is 2
         And its deployment_minimum_healthy_percent is 50

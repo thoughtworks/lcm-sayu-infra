@@ -58,7 +58,8 @@ workflows:
                 - pipeline
           requires:
             - plan-apply
-
+workflows:
+   version: 2
    hold_destroy:
     jobs:  
       - hold-destroy:

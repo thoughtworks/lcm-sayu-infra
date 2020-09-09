@@ -158,7 +158,6 @@ Feature: This module should create all resources for Network
         And its network_mode is "awsvpc"
         And it has requires_compatibilities
         And it has execution_role_arn
-        And it has container_definitions
 
     Scenario: ECS Service should be created
         Given I have aws_ecs_service resource configured

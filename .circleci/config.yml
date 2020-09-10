@@ -1,8 +1,8 @@
 version: 2.1
 parameters:
   action:
-    type: string
-    default: "apply"
+    type: boolean
+    default: false
 jobs:
   plan-apply:
     working_directory: ~/lcm-sayu-infra
@@ -62,8 +62,6 @@ workflows:
             - plan-apply
 
   hold_destroy:
-    when:
-      condition:
-        equal: [destroy, << pipeline.parameters.action >>]
+    when: << pipeline.parameters.action >>
     jobs:
       - destroy

@@ -10,7 +10,7 @@ jobs:
           name: terraform init & plan
           command: |
             terraform init -input=false
-            terraform workspace new dev || terraform workspace select dev
+            terraform workspace new $CIRCLE_BRANCH || terraform workspace select $CIRCLE_BRANCH
             terraform plan -out terraform.out
       - persist_to_workspace:
           root: .
@@ -40,7 +40,7 @@ jobs:
       - run:
           name: terraform destroy
           command: |
-            terraform workspace select dev
+            terraform workspace select $CIRCLE_BRANCH
             terraform destroy -auto-approve
 
 workflows:
@@ -51,9 +51,8 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - prod
                 - dev
-                - pipeline
           requires:
             - plan-apply
       - approve-destroy:
@@ -61,5 +60,10 @@ workflows:
           requires:
             - apply
       - destroy:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
           requires:
             - approve-destroy

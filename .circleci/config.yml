@@ -1,5 +1,8 @@
-version: 2
-
+version: 2.1
+parameters:
+  action:
+    type: string
+    default: "apply"
 jobs:
   plan-apply:
     working_directory: ~/lcm-sayu-infra
@@ -45,7 +48,6 @@ jobs:
             terraform destroy -auto-approve
 
 workflows:
-  version: 2
   plan_approve_apply:
     jobs:
       - plan-apply
@@ -60,6 +62,9 @@ workflows:
             - plan-apply
 
   hold_destroy:
+    when:
+      condition:
+        equal: [destroy, << pipeline.parameters.action >>]
     jobs:
       - hold-destroy:
           type: approval

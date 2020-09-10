@@ -16,7 +16,6 @@ jobs:
           root: .
           paths:
             - .
-
   apply:
     docker:
       - image: hashicorp/terraform:light
@@ -46,7 +45,12 @@ jobs:
 workflows:
   deploy_infrastructure:
     jobs:
-      - plan-apply
+      - plan-apply:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
       - apply:
           filters:
             branches:
@@ -56,6 +60,11 @@ workflows:
           requires:
             - plan-apply
       - approve-destroy:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
           type: approval
           requires:
             - apply

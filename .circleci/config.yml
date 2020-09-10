@@ -1,0 +1,78 @@
+version: 2.1
+jobs:
+  plan-apply:
+    working_directory: ~/lcm-sayu-infra
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: terraform init & plan
+          command: |
+            terraform init -input=false
+            terraform workspace new $CIRCLE_BRANCH || terraform workspace select $CIRCLE_BRANCH
+            terraform plan -out terraform.out
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  apply:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform
+          command: |
+            terraform apply -auto-approve terraform.out
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  destroy:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform destroy
+          command: |
+            terraform workspace select $CIRCLE_BRANCH
+            terraform destroy -auto-approve
+
+workflows:
+  deploy_infrastructure:
+    jobs:
+      - plan-apply:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
+      - apply:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
+          requires:
+            - plan-apply
+      - approve-destroy:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
+          type: approval
+          requires:
+            - apply
+      - destroy:
+          filters:
+            branches:
+              only:
+                - prod
+                - dev
+          requires:
+            - approve-destroy

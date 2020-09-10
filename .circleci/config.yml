@@ -56,11 +56,10 @@ workflows:
                 - pipeline
           requires:
             - plan-apply
-
-  destroy_infrastructure:
-    jobs:
       - approve-destroy:
           type: approval
+          requires:
+            - apply
       - destroy:
           requires:
             - approve-destroy

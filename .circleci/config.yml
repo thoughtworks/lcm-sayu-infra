@@ -16,6 +16,20 @@ jobs:
           root: .
           paths:
             - .
+  run-tests:
+    working_directory: ~/lcm-sayu-infra
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - run:
+          name: running tests compliance
+          command: |
+
+            terraform workspace new tst
+            terraform workspace select tst
+            terraform plan -out terraform.out
+            pip install terraform-compliance
+            terraform-compliance -p terraform.out -f tests
   apply:
     docker:
       - image: hashicorp/terraform:light
@@ -51,6 +65,7 @@ workflows:
               only:
                 - prod
                 - dev
+      - run-tests
       - apply:
           filters:
             branches:

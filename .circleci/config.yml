@@ -1,8 +1,4 @@
 version: 2.1
-parameters:
-  action:
-    type: boolean
-    default: false
 jobs:
   plan-apply:
     working_directory: ~/lcm-sayu-infra
@@ -49,9 +45,6 @@ jobs:
 
 workflows:
   deploy_infrastructure:
-    when:
-      condition:
-        not: << pipeline.parameters.action >>
     jobs:
       - plan-apply
       - apply:
@@ -65,10 +58,9 @@ workflows:
             - plan-apply
 
   destroy_infrastructure:
-    when: << pipeline.parameters.action >>
     jobs:
-      - hold-destroy:
+      - approve-destroy:
           type: approval
       - destroy:
           requires:
-            - hold-destroy
+            - approve-destroy

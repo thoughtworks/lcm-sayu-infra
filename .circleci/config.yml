@@ -59,13 +59,15 @@ jobs:
 workflows:
   deploy_infrastructure:
     jobs:
+      - run-tests
       - plan-apply:
           filters:
             branches:
               only:
                 - prod
                 - dev
-      - run-tests
+          requires:
+            - run-tests
       - apply:
           filters:
             branches:

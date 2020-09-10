@@ -66,8 +66,4 @@ workflows:
       condition:
         equal: [destroy, << pipeline.parameters.action >>]
     jobs:
-      - hold-destroy:
-          type: approval
-      - destroy:
-          requires:
-            - hold-destroy
+      - destroy

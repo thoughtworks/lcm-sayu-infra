@@ -49,6 +49,9 @@ jobs:
 
 workflows:
   plan_approve_apply:
+    when:
+      condition:
+        not: << pipeline.parameters.action >>
     jobs:
       - plan-apply
       - apply:

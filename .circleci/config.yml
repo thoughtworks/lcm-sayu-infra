@@ -22,6 +22,7 @@ jobs:
       - image: hashicorp/terraform:light
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: running tests compliance
           command: |

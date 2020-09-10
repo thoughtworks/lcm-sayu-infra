@@ -25,6 +25,8 @@ jobs:
       - run:
           name: running tests compliance
           command: |
+            apk update
+            apk add py-pip
             terraform init
             terraform workspace new tst
             terraform workspace select tst

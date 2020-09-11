@@ -19,10 +19,9 @@ jobs:
   run-tests:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: docker:18.06.1-ce-git
+      - image: hashicorp/terraform:light
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: running tests compliance
           command: |

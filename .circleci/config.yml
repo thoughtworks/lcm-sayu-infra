@@ -28,7 +28,7 @@ jobs:
             apk add py-pip libxml2-dev libxslt-dev
             python3 --version
             pip -V
-            pip install lxml==4.5.0
+            pip install libxml2-python3 lxml==4.5.0
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out

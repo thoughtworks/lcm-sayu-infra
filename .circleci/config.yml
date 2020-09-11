@@ -31,7 +31,7 @@ jobs:
             apk add wget unzip
             wget -O terraform.zip https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
             unzip terraform.zip
-            sudo mv terraform /usr/local/bin/terraform
+            mv terraform /usr/local/bin/terraform
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out

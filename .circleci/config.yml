@@ -35,7 +35,9 @@ jobs:
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
+            ls
             terraform show -json terraform.out > plan.json
+            ls
             terraformcompliance -p plan.json -f tests
   apply:
     docker:

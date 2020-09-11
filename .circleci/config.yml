@@ -35,7 +35,8 @@ jobs:
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            terraformcompliance -p terraform.out -f tests
+            terraform show -json terraform.out > plan.json
+            terraformcompliance -p plan.json -f tests
   apply:
     docker:
       - image: hashicorp/terraform:light

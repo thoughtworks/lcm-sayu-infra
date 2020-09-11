@@ -30,6 +30,7 @@ jobs:
             wget -O terraform.zip https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
             unzip terraform.zip
             mv terraform /usr/local/bin/terraform
+            terraform -v
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
@@ -38,7 +39,7 @@ jobs:
             ls
             cat plan.json
             echo $PWD
-            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -p terraform.out -t terraform -f tests
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -p terraform.json -f /tests
 
 
   apply:

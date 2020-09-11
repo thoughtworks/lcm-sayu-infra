@@ -36,7 +36,7 @@ jobs:
             ls
             terraform show -json terraform.out > plan.json
             ls
-            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -f plan.json -t tests
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -p plan.json -t tests
   apply:
     docker:
       - image: hashicorp/terraform:light

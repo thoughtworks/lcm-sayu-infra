@@ -28,7 +28,9 @@ jobs:
           command: |
             function terraformcompliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
             docker pull eerkunt/terraform-compliance
-            apk add terraform
+            apk add wget unzip
+            wget -o  https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
+            unzip terraform_0.13.2_linux_386.zip
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out

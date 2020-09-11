@@ -38,7 +38,7 @@ jobs:
             ls
             cat plan.json
             echo $PWD
-            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -d -p terraform.out -f tests
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -p terraform.out -t terraform -f tests
 
 
   apply:

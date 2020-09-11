@@ -25,10 +25,8 @@ jobs:
       - run:
           name: running tests compliance
           command: |
-            apk add py-pip libxml2-dev libxslt-dev
-            python3 --version
-            pip -V
-            pip install lxml==4.5.0 libxml2-python3 
+            function terraform-compliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
+            docker pull eerkunt/terraform-compliance
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out

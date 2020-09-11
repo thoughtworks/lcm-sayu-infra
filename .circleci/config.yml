@@ -19,18 +19,27 @@ jobs:
   run-tests:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: hashicorp/terraform:light
+      - image: docker:18.06.1-ce-git
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: running tests compliance
           command: |
-            apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
+            apk add wget unzip
+            wget -O terraform.zip https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
+            unzip terraform.zip
+            mv terraform /usr/local/bin/terraform
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            pip install wheel terraform-compliance
-            terraform-compliance -p terraform.out -f tests
+            ls
+            terraform show -json terraform.out > plan.json
+            ls
+            cat plan.json
+            echo $PWD
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -d -p terraform.out -f tests
+
 
   apply:
     docker:

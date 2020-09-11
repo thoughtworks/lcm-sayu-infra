@@ -29,7 +29,6 @@ jobs:
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            pip install wheel lxml filetype junit-xml smmap gitdb gitpython netaddr emoji diskcache docopt humanize colorful parse parse-type pysingleton tag-expressions
             pip install terraform-compliance
             terraform-compliance -p terraform.out -f tests
 

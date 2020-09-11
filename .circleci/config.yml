@@ -27,7 +27,7 @@ jobs:
           name: running tests compliance
           command: |
             apk add py-pip
-            python --version
+            python3 --version
             pip -V
             pip install libxml2-python lxml
             terraform init

@@ -7,7 +7,7 @@ Feature: This module should create all resources for Network
         #And its cidr_block is "10.0.0.0/16"
         And it contains tags
         Then it must contain Name
-        And its value must match the "^lcm-sayu-vpc-(dev|prod)$" regex
+        And its value must match the "^lcm-sayu-vpc-(dev|prod|tst)$" regex
 
     Scenario: Internet Gateway should be created
         Given I have aws_internet_gateway resource configured
@@ -15,7 +15,7 @@ Feature: This module should create all resources for Network
         And its type is "aws_internet_gateway"
         And it contains tags
         Then it must contain Name
-        Then its value must match the "^lcm-sayu-igw-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-igw-(dev|prod|tst)$" regex
     
     Scenario: Public subnet should be created
         Given I have aws_subnet resource configured
@@ -25,7 +25,7 @@ Feature: This module should create all resources for Network
         And its map_public_ip_on_launch is true
         And it contains tags
         Then it must contain Name
-        And its value must match the "lcm-sayu-public-subnet-\d-(dev|prod)" regex
+        And its value must match the "lcm-sayu-public-subnet-\d-(dev|prod|tst)" regex
 
     Scenario: Private subnet should be created
         Given I have aws_subnet resource configured
@@ -35,7 +35,7 @@ Feature: This module should create all resources for Network
         And its map_public_ip_on_launch is false
         And it contains tags
         Then it must contain Name
-        And its value must match the "lcm-sayu-private-subnet-\d-(dev|prod)" regex
+        And its value must match the "lcm-sayu-private-subnet-\d-(dev|prod|tst)" regex
 
     
     Scenario: Route table to public subnet should be created
@@ -83,7 +83,7 @@ Feature: This module should create all resources for Network
         Given I have aws_security_group resource configured
         When its address is "module.alb.aws_security_group.alb"
         And it contains name
-        Then its value must match the "lcm-sayu-sg-alb-(dev|prod)" regex       
+        Then its value must match the "lcm-sayu-sg-alb-(dev|prod|tst)" regex       
       
     Scenario: Security Group to ECS Task should be created
         Given I have aws_security_group resource configured
@@ -92,7 +92,7 @@ Feature: This module should create all resources for Network
         And it has egress
         And its type is "aws_security_group"
         And it contain name
-        Then its value must match the "^lcm-sayu-sg-task-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-sg-task-(dev|prod|tst)$" regex
 
 
     Scenario: ALB should be created
@@ -102,7 +102,7 @@ Feature: This module should create all resources for Network
         And its load_balancer_type is "application"
         And its enable_deletion_protection is false
         Then it must contain name
-        And its value must match the "^lcm-sayu-alb-(dev|prod)$" regex
+        And its value must match the "^lcm-sayu-alb-(dev|prod|tst)$" regex
 
 
     Scenario: ALB Target Group should be created
@@ -112,7 +112,7 @@ Feature: This module should create all resources for Network
         And its protocol is "HTTP"
         And its target_type is "ip"
         Then it must contain name
-        And its value must match the "^lcm-sayu-tg-(dev|prod)$" regex
+        And its value must match the "^lcm-sayu-tg-(dev|prod|tst)$" regex
  
 
     Scenario: ALB Listener to HTTP should be created
@@ -128,7 +128,7 @@ Feature: This module should create all resources for Network
         When its address is "module.ecr.aws_ecr_repository.main"
         And its image_tag_mutability is "MUTABLE" 
         When it contains name
-        Then its value must match the "^lcm-sayu-repository-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-repository-(dev|prod|tst)$" regex
     
     Scenario: ECR lifecycle policy should be created
         Given I have aws_ecr_lifecycle_policy resource configured
@@ -139,17 +139,17 @@ Feature: This module should create all resources for Network
     Scenario: ECS cluster should be created
         Given I have aws_ecs_cluster resource configured
         When it contains name
-        Then its value must match the "^lcm-sayu-cluster-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-cluster-(dev|prod|tst)$" regex
     
     Scenario: AWS iam role should be created
         Given I have aws_iam_role resource configured
         When it contains name
-        Then its value must match the "^lcm-sayu-ecsTaskExecutionRole-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-ecsTaskExecutionRole-(dev|prod|tst)$" regex
 
     Scenario: AWS iam role policy attachment should be created
         Given I have aws_iam_role_policy_attachment resource configured
         When it contains role
-        Then its value must match the "^lcm-sayu-ecsTaskExecutionRole-(dev|prod)$" regex
+        Then its value must match the "^lcm-sayu-ecsTaskExecutionRole-(dev|prod|tst)$" regex
     
     Scenario: ECS Task definition should be created
         Given I have aws_ecs_task_definition resource configured
@@ -172,5 +172,5 @@ Feature: This module should create all resources for Network
         And it has load_balancer
         And it has assign_public_ip
         Then it must contain name
-        And its value must match the "^lcm-sayu-service-(dev|prod)$" regex
+        And its value must match the "^lcm-sayu-service-(dev|prod|tst)$" regex
   

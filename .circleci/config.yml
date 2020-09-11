@@ -26,20 +26,12 @@ jobs:
       - run:
           name: running tests compliance
           command: |
-            apk add wget unzip
-            wget -O terraform.zip https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
-            unzip terraform.zip
-            mv terraform /usr/local/bin/terraform
+            apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            ls
-            terraform show -json terraform.out > plan.json
-            ls
-            cat plan.json
-            echo $PWD
-            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -d -p terraform.out -f tests
-
+            pip install wheel terraform-compliance
+            terraform-compliance -p terraform.out -f tests
 
   apply:
     docker:

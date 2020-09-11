@@ -29,7 +29,7 @@ jobs:
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            pip install lxml==4.5.0 terraform-compliance==1.1.7
+            pip install terraform-compliance
             terraform-compliance -p terraform.out -f tests
 
   apply:

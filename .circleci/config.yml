@@ -38,10 +38,10 @@ jobs:
             terraform show -json terraform.out > plan.json
             ls
             cat plan.json
-            echo $PWD
+            echo $pwd
             function terraformcompliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
             docker pull eerkunt/terraform-compliance
-            terraformcompliance -p plan.json -f tests
+            terraformcompliance -f tests/ -t -p plan.json 
 
 
   apply:

@@ -41,7 +41,7 @@ jobs:
             echo $pwd
             function terraformcompliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
             docker pull eerkunt/terraform-compliance
-            terraformcompliance -f tests/ -t -p plan.json 
+            terraformcompliance 
 
 
   apply:

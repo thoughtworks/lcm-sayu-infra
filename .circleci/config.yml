@@ -38,7 +38,7 @@ jobs:
             ls
             cat plan.json
             echo $PWD
-            docker run --rm -v ~/lcm-sayu-infra:/target -i -t eerkunt/terraform-compliance -p plan.json -f tests
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -p terraform.out -f tests -d
   apply:
     docker:
       - image: hashicorp/terraform:light

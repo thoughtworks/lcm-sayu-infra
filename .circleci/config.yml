@@ -26,8 +26,6 @@ jobs:
       - run:
           name: running tests compliance
           command: |
-            function terraformcompliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
-            docker pull eerkunt/terraform-compliance
             apk add wget unzip
             wget -O terraform.zip https://releases.hashicorp.com/terraform/0.13.2/terraform_0.13.2_linux_386.zip
             unzip terraform.zip
@@ -38,7 +36,7 @@ jobs:
             ls
             terraform show -json terraform.out > plan.json
             ls
-            terraformcompliance -p plan.json -f tests
+            docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance -f plan.json -t tests
   apply:
     docker:
       - image: hashicorp/terraform:light

@@ -41,7 +41,7 @@ jobs:
             echo $PWD:/target
             function terraformcompliance { docker run --rm -v $PWD:/target -i -t eerkunt/terraform-compliance "$@"; }
             docker pull eerkunt/terraform-compliance
-            terraformcompliance --feature ~/lcm-sayu-infra/tests -p ~/lcm-sayu-infra/plan.json
+            terraformcompliance - /target/tests -p /target/plan.json
 
 
   apply:

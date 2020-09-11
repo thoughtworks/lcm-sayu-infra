@@ -22,11 +22,11 @@ jobs:
       - image: hashicorp/terraform:light
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: running tests compliance
           command: |
             apk add py-pip
+            apk add python3-lxml libxml2-dev libxslt-dev python-dev
             python3 --version
             pip -V
             pip install libxml2-python3 lxml

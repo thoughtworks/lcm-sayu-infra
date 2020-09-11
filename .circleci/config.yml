@@ -26,7 +26,7 @@ jobs:
       - run:
           name: running tests compliance
           command: |
-            function terraform-compliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }
+            -c 'function terraform-compliance { docker run --rm -v $(pwd):/target -i -t eerkunt/terraform-compliance "$@"; }'
             docker pull eerkunt/terraform-compliance
             terraform init
             terraform workspace new tst || terraform workspace select tst

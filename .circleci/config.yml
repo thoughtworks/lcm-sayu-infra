@@ -83,7 +83,7 @@ workflows:
           filters:
             branches:
               only:
-                - prod
+                - master
                 - dev
           requires:
             - plan-apply
@@ -91,7 +91,7 @@ workflows:
           filters:
             branches:
               only:
-                - prod
+                - master
                 - dev
           type: approval
           requires:
@@ -100,7 +100,7 @@ workflows:
           filters:
             branches:
               only:
-                - prod
+                - master
                 - dev
           requires:
             - approve-destroy

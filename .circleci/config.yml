@@ -70,7 +70,11 @@ jobs:
 workflows:
   deploy_infrastructure:
     jobs:
-      - run-tests
+      - run-tests:
+          filters:
+            branches:
+              only:
+                - dev
       - plan-apply:
           filters:
             branches:

@@ -9,13 +9,33 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
+            export PROJECT_WORKSPACE=dev
             terraform init -input=false
-            terraform workspace new $CIRCLE_BRANCH || terraform workspace select $CIRCLE_BRANCH
+            if [[ $CIRCLE_BRANCH == "master" ]]; then
+               export PROJECT_WORKSPACE=prod
+            fi
+            terraform workspace new $PROJECT_WORKSPACE || terraform workspace select $PROJECT_WORKSPACE
             terraform plan -out terraform.out
       - persist_to_workspace:
           root: .
           paths:
             - .
+  run-tests:
+    working_directory: ~/lcm-sayu-infra
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: running tests compliance
+          command: |
+            apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
+            terraform init
+            terraform workspace new tst || terraform workspace select tst
+            terraform plan -out terraform.out
+            pip install wheel 
+            pip install terraform-compliance
+            terraform-compliance -p terraform.out -f tests
   apply:
     docker:
       - image: hashicorp/terraform:light
@@ -39,18 +59,26 @@ jobs:
       - run:
           name: terraform destroy
           command: |
-            terraform workspace select $CIRCLE_BRANCH
+            export PROJECT_WORKSPACE=dev
+            terraform init -input=false
+            if [[ $CIRCLE_BRANCH == "master" ]]; then
+                export PROJECT_WORKSPACE=prod
+            fi
+            terraform workspace select $PROJECT_WORKSPACE
             terraform destroy -auto-approve
 
 workflows:
   deploy_infrastructure:
     jobs:
+      - run-tests
       - plan-apply:
           filters:
             branches:
               only:
                 - prod
                 - dev
+          requires:
+            - run-tests
       - apply:
           filters:
             branches:

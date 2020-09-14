@@ -21,7 +21,6 @@ jobs:
     docker:
       - image: hashicorp/terraform:light
     steps:
-      - checkout
       - run:
           name: running tests compliance
           command: |

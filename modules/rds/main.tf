@@ -2,7 +2,7 @@ resource "aws_db_instance" "rds" {
   identifier             = "${var.app_name}-database-${terraform.workspace}"
   allocated_storage      = var.allocated_storage
   engine                 = "postgres"
-  engine_version         = "9.6.6"
+  engine_version         = "9.6.11"
   instance_class         = var.instance_class
   name                   = var.database_name
   username               = var.random_username

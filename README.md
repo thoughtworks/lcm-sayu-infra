@@ -43,3 +43,24 @@ For testing the infrastructure we use the [terraform-compliance](https://terrafo
     1. `terraform-compliance -p plan.json -f tests`
 
 
+## About environments
+For different environments, we use workspaces:
+
+Ex: to dev environment we use workspace "dev"
+
+- __Create new workspace:__  
+
+    1. `terraform workspace new dev`
+
+- __Select workspace created:__ 
+
+    2. `terraform workspace select dev`
+
+- __Execute plan:__ 
+
+    3. `terraform plan -workspace=dev`
+
+- __Execute apply:__ 
+
+    4. `terraform apply -workspace=dev`
+

@@ -9,12 +9,12 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
-            WORKSPACE = dev
+            export TF_WORKSPACE=dev
             terraform init -input=false
             if [[ $CIRCLE_BRANCH == "master" ]]; then
-                WORKSPACE = prod
+               export TF_WORKSPACE=prod
             fi
-            terraform workspace new $WORKSPACE || terraform workspace select $WORKSPACE
+            terraform workspace new $TF_WORKSPACE || terraform workspace select $TF_WORKSPACE
             terraform plan -out terraform.out
       - persist_to_workspace:
           root: .
@@ -59,12 +59,12 @@ jobs:
       - run:
           name: terraform destroy
           command: |
-            WORKSPACE = dev
+            export TF_WORKSPACE=dev
             terraform init -input=false
             if [[ $CIRCLE_BRANCH == "master" ]]; then
-                WORKSPACE = prod
+                export TF_WORKSPACE=prod
             fi
-            terraform workspace select $WORKSPACE
+            terraform workspace select $TF_WORKSPACE
             terraform destroy -auto-approve
 
 workflows:

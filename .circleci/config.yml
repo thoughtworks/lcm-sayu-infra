@@ -75,7 +75,7 @@ workflows:
           filters:
             branches:
               only:
-                - prod
+                - master
                 - dev
           requires:
             - run-tests

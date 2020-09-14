@@ -25,10 +25,11 @@ jobs:
       - run:
           name: running tests compliance
           command: |
-
-            terraform workspace new tst
-            terraform workspace select tst
+            apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
+            terraform init
+            terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
+            pip install wheel 
             pip install terraform-compliance
             terraform-compliance -p terraform.out -f tests
   apply:

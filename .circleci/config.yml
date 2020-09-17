@@ -33,7 +33,7 @@ jobs:
             terraform init
             terraform workspace new tst || terraform workspace select tst
             terraform plan -out terraform.out
-            pip install wheel 
+            pip install wheel
             pip install terraform-compliance
             terraform-compliance -p terraform.out -f tests
   apply:
@@ -79,6 +79,15 @@ workflows:
                 - dev
           requires:
             - run-tests
+      - approve-apply:
+          filters:
+            branches:
+              only:
+                - master
+                - dev
+          type: approval
+          requires:
+            - plan-apply
       - apply:
           filters:
             branches:
@@ -86,7 +95,7 @@ workflows:
                 - master
                 - dev
           requires:
-            - plan-apply
+            - approve-apply
       - approve-destroy:
           filters:
             branches:

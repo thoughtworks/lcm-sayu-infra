@@ -67,8 +67,69 @@ resource "aws_route" "public" {
   route_table_id =  element(aws_route_table.public.*.id, count.index)
 }
 
- 
 # Attach NAT gateway to private subnet
+data "aws_ami" "amazon_linux_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name   = "block-device-mapping.volume-type"
+    values = ["gp2"]
+  }
+}
+
+resource "aws_security_group" "nat" {
+  name   = "${var.app_name}-nat-gateway-${terraform.workspace}"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.app_name}-nat-gateway-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
+  }
+}
+
+resource "aws_network_interface" "nat" {
+  count             = length(lookup(var.private_subnets, terraform.workspace))
+  subnet_id         = element(aws_subnet.public.*.id, count.index)
+  security_groups   = [aws_security_group.nat.id]
+  source_dest_check = false
+
+  tags = {
+    Name = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
+  }
+}
+
 resource "aws_eip" "nat" {
   count = length(lookup(var.private_subnets, terraform.workspace))
   vpc = true
@@ -78,15 +139,69 @@ resource "aws_eip" "nat" {
   }
 }
 
-resource "aws_nat_gateway" "main" {
-  count         = length(lookup(var.private_subnets, terraform.workspace))
-  allocation_id = element(aws_eip.nat.*.id, count.index)
-  subnet_id     = element(aws_subnet.public.*.id, count.index)
-  depends_on    = [aws_internet_gateway.main]
+resource "aws_eip_association" "nat" {
+  count                = length(lookup(var.private_subnets, terraform.workspace))
+  network_interface_id = aws_network_interface.nat[count.index].id
+  allocation_id        = aws_eip.nat[count.index].id
+}
+
+resource "aws_launch_template" "nat" {
+  count       = length(lookup(var.private_subnets, terraform.workspace))
+  name_prefix = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
+  image_id    = data.aws_ami.amazon_linux_ami.id
+  user_data   = base64encode(file("${path.module}/definitions/nat-gateway-init.sh"))
+
+  network_interfaces {
+    network_interface_id = aws_network_interface.nat[count.index].id
+  }
 
   tags = {
     Name = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
     Environment = "${terraform.workspace}"
+  }
+}
+
+resource "aws_autoscaling_group" "nat" {
+  count              = length(lookup(var.private_subnets, terraform.workspace))
+  name_prefix        = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
+  desired_capacity   = 1
+  min_size           = 1
+  max_size           = 1
+  availability_zones = [element(var.availability_zones, count.index)]
+
+  mixed_instances_policy {
+    instances_distribution {
+      on_demand_base_capacity                  = 0
+      on_demand_percentage_above_base_capacity = 0
+    }
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.nat[count.index].id
+        version            = "$Latest"
+      }
+      dynamic "override" {
+        for_each = var.nat_gateway_instance_types
+        content {
+          instance_type = override.value
+        }
+      }
+    }
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Environment"
+    value               = terraform.workspace
+    propagate_at_launch = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -105,7 +220,7 @@ resource "aws_route" "private" {
   count                  = length(compact(lookup(var.private_subnets, terraform.workspace)))
   route_table_id         = element(aws_route_table.private.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(aws_nat_gateway.main.*.id, count.index)
+  network_interface_id   = element(aws_network_interface.nat.*.id, count.index)
 }
 
 resource "aws_route_table_association" "private" {

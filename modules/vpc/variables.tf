@@ -15,3 +15,7 @@ variable "public_subnets" {
 }
 variable "availability_zones" {}
 
+variable "nat_gateway_instance_types" {
+  type    = list(string)
+  default = ["t3.nano", "t2.nano", "t3.micro", "t2.micro"]
+}

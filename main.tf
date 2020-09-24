@@ -4,6 +4,7 @@ provider "aws" {
   version = "~> 3.4.0"
 }
 terraform {
+  required_version = "~> 0.13.3"
   backend "s3" {
     bucket = "***REMOVED***"
     key    = "***REMOVED***"
@@ -49,6 +50,7 @@ module "rds"{
   public_subnets_ids = module.vpc.public_subnets_ids
   random_password = module.secrets.random_password
   random_username = module.secrets.random_username
+  security_group_ecs_task = module.ecs.security_group_ecs_task
 }
 
 module "ecs" {

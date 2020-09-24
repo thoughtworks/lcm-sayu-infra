@@ -3,7 +3,7 @@ jobs:
   plan-apply:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - checkout
       - run:
@@ -23,7 +23,7 @@ jobs:
   run-tests:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - checkout
       - run:

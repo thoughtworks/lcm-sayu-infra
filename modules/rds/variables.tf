@@ -15,3 +15,4 @@ variable "instance_class" {}
 variable "database_name" {}
 variable "random_password" {}
 variable "random_username" {}
+variable "security_group_ecs_task" {}

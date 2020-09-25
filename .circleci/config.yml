@@ -38,7 +38,7 @@ jobs:
             terraform-compliance -p terraform.out -f tests
   apply:
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - attach_workspace:
           at: .
@@ -52,7 +52,7 @@ jobs:
             - .
   destroy:
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - attach_workspace:
           at: .

@@ -26,7 +26,6 @@ public_subnets      = {
     prod = ["10.1.2.0/24", "10.1.3.0/24"]
 }
 
-***REMOVED*** 
 container_cpu = 256
 container_memory = 512
 

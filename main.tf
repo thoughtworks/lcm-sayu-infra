@@ -6,9 +6,9 @@ provider "aws" {
 terraform {
   required_version = "~> 0.13.3"
   backend "s3" {
-    bucket = "***REMOVED***"
-    key    = "***REMOVED***"
-    region = "us-west-2"
+    bucket = var.aws_bucket
+    key    = var.aws_bucket_key
+    region = var.aws_region
   }
 }
 

@@ -38,3 +38,6 @@ variable "container_memory" {}
 variable "allocated_storage" {}
 variable "instance_class" {}
 variable "database_name" {}
+
+variable "aws_bucket" {}
+variable "aws_bucket_key" {}

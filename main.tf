@@ -5,11 +5,7 @@ provider "aws" {
 }
 terraform {
   required_version = "~> 0.13.3"
-  backend "s3" {
-    bucket = var.aws_bucket
-    key    = var.aws_bucket_key
-    region = var.aws_region
-  }
+  backend "s3" {}
 }
 
 

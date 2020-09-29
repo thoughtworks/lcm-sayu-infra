@@ -10,7 +10,7 @@ jobs:
           name: terraform init & plan
           command: |
             export PROJECT_WORKSPACE=dev
-            printf "bucket = $TF_VAR_aws_bucket \nkey = $TF_VAR_aws_bucket_key \nregion = \"us-west-2\"" > backend.tfvars
+            printf "bucket = \"$TF_VAR_aws_bucket\" \nkey = \"$TF_VAR_aws_bucket_key\" \nregion = \"us-west-2\"" > backend.tfvars
             terraform init -backend-config=backend.tfvars -input=false
             if [[ $CIRCLE_BRANCH == "master" ]]; then
                export PROJECT_WORKSPACE=prod

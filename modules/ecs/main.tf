@@ -81,6 +81,14 @@ resource "aws_ecs_task_definition" "main" {
       containerPort = var.container_port
       hostPort      = var.container_port
     }]
+    logConfiguration = {
+      "logDriver": "awslogs",
+      "options": {
+          "awslogs-region" : "${var.aws_region}",
+          "awslogs-group" : "/ecs/lcm-sayu-task-dev",
+          "awslogs-stream-prefix" : "ecs"
+      }
+    }
   }])
 
   tags = {

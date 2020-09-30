@@ -64,6 +64,7 @@ module "ecs" {
   random_username = module.secrets.random_username
   private_subnets_ids = module.vpc.private_subnets_ids
   aws_alb_target_group = module.alb.aws_alb_target_group
+  aws_region = var.aws_region
 }
 
 module "secrets" {

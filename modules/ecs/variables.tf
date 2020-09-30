@@ -17,3 +17,4 @@ variable "private_subnets_ids" {
   type = list
 }
 variable "aws_alb_target_group"{}
+variable "aws_region"{}

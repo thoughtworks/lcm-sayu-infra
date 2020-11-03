@@ -69,12 +69,16 @@ resource "aws_ecs_task_definition" "main" {
     image       = "${var.container_image}-${terraform.workspace}:latest"
     essential   = true
     environment = [
-     {"name": "DATABASE_ENDPOINT", "value": "${var.endpoint_rds}"},
-      {"name": "DATABASE_PORT", "value": "5432"},
-      {"name": "DATABASE_PASSWORD", "value": "${var.random_password}"},
-      {"name": "DATABASE_USERNAME", "value": "${var.random_username}"},
-      {"name": "DATABASE_NAME", "value": "${var.database_name}"},
-      {"name": "ENVIRONMENT", "value": terraform.workspace}
+     {"name": "TYPEORM_HOST", "value": "${var.endpoint_rds}"},
+      {"name": "TYPEORM_PORT", "value": "5432"},
+      {"name": "TYPEORM_PASSWORD", "value": "${var.random_password}"},
+      {"name": "TYPEORM_USERNAME", "value": "${var.random_username}"},
+      {"name": "TYPEORM_DATABASE", "value": "${var.database_name}"},
+      {"name": "ENVIRONMENT", "value": terraform.workspace},
+      {"name": "TYPEORM_CONNECTION", "value": "postgres"},
+      {"name": "TYPEORM_SYNCHRONIZE", "value": "false"},
+      {"name": "TYPEORM_LOGGING", "value": "true"},
+      {"name": "TYPEORM_ENTITIES", "value": "src/entity/*.js"}
     ]
     portMappings = [{
       protocol      = "tcp"

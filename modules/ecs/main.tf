@@ -78,7 +78,11 @@ resource "aws_ecs_task_definition" "main" {
       {"name": "TYPEORM_CONNECTION", "value": "postgres"},
       {"name": "TYPEORM_SYNCHRONIZE", "value": "false"},
       {"name": "TYPEORM_LOGGING", "value": "true"},
-      {"name": "TYPEORM_ENTITIES", "value": "src/entity/*.js"}
+      {"name": "TYPEORM_ENTITIES", "value": "src/entity/*.js"},
+      {"name": "GOOGLE_ID", "value": "${var.google_id}"},
+      {"name": "GOOGLE_SECRET", "value": "${var.google_secret}"},
+      {"name": "SECRET", "value": "${var.secret}"},
+      {"name": "NEXTAUTH_URL", "value": "${var.nextauth_url}"},
     ]
     portMappings = [{
       protocol      = "tcp"

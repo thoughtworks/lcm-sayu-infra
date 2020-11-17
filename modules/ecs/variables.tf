@@ -18,3 +18,20 @@ variable "private_subnets_ids" {
 }
 variable "aws_alb_target_group"{}
 variable "aws_region"{}
+
+variable "google_id" {
+  type = string
+  description = "Id of the sayu's google account"
+}
+variable "google_secret" {
+  type = string
+  description = "secret of the sayu's google account"
+}
+variable "secret" {
+  type = string
+  description = "secret to encrypt session"
+}
+variable "nextauth_url" {
+  type = string
+  description = "Production URL"
+}

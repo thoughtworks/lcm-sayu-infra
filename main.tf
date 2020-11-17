@@ -65,6 +65,10 @@ module "ecs" {
   private_subnets_ids = module.vpc.private_subnets_ids
   aws_alb_target_group = module.alb.aws_alb_target_group
   aws_region = var.aws_region
+  google_id = var.google_id
+  google_secret = var.google_secret
+  secret = var.secret
+  nextauth_url = var.nextauth_url
 }
 
 module "secrets" {

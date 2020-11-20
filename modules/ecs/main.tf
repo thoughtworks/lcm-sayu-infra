@@ -27,7 +27,7 @@ resource "aws_ecs_cluster" "main" {
   
   tags = {
     Name        = "${var.app_name}-cluster-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -69,11 +69,11 @@ resource "aws_ecs_task_definition" "main" {
     image       = "${var.container_image}-${terraform.workspace}:latest"
     essential   = true
     environment = [
-     {"name": "TYPEORM_HOST", "value": "${var.endpoint_rds}"},
+     {"name": "TYPEORM_HOST", "value": var.endpoint_rds },
       {"name": "TYPEORM_PORT", "value": "5432"},
-      {"name": "TYPEORM_PASSWORD", "value": "${var.random_password}"},
-      {"name": "TYPEORM_USERNAME", "value": "${var.random_username}"},
-      {"name": "TYPEORM_DATABASE", "value": "${var.database_name}"},
+      {"name": "TYPEORM_PASSWORD", "value": var.random_password},
+      {"name": "TYPEORM_USERNAME", "value": var.random_username},
+      {"name": "TYPEORM_DATABASE", "value": var.database_name},
       {"name": "ENVIRONMENT", "value": terraform.workspace},
       {"name": "TYPEORM_CONNECTION", "value": "postgres"},
       {"name": "TYPEORM_SYNCHRONIZE", "value": "false"},
@@ -92,7 +92,7 @@ resource "aws_ecs_task_definition" "main" {
     logConfiguration = {
       "logDriver": "awslogs",
       "options": {
-          "awslogs-region" : "${var.aws_region}",
+          "awslogs-region" : var.aws_region,
           "awslogs-group" : "/ecs/lcm-sayu-task-dev",
           "awslogs-stream-prefix" : "ecs"
       }
@@ -101,7 +101,7 @@ resource "aws_ecs_task_definition" "main" {
 
   tags = {
     Name        = "${var.app_name}-task-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
   #depends_on = [aws_db_instance.rds]
   depends_on = [var.endpoint_rds]

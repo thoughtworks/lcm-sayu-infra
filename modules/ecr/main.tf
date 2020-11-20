@@ -4,7 +4,7 @@ resource "aws_ecr_repository" "main" {
   image_tag_mutability = "MUTABLE"
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 

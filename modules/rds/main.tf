@@ -11,7 +11,7 @@ resource "aws_db_instance" "rds" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
   description = "RDS subnet group"
   subnet_ids  = var.private_subnets_ids
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_security_group" "rds_sg" {
 
   tags = {
     Name = "${var.app_name}-sg-rds-${terraform.workspace}"
-    Environment =  "${terraform.workspace}"
+    Environment =  terraform.workspace
   }
 
   //allow traffic for TCP 5432

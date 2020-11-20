@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   cidr_block = lookup(var.aws_vpc_cidr_block, terraform.workspace)
   tags = {
     Name = "${var.app_name}-vpc-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -13,7 +13,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
     Name = "${var.app_name}-igw-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -27,7 +27,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
   tags = {
     Name = "${var.app_name}-public-subnet-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -39,7 +39,7 @@ resource "aws_subnet" "private" {
   count             = length(lookup(var.private_subnets, terraform.workspace))
   tags = {
     Name = "${var.app_name}-private-subnet-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -49,7 +49,7 @@ resource "aws_subnet" "private" {
   vpc_id = aws_vpc.main.id
   tags = {
     Name = "${var.app_name}-route-table-public-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -114,7 +114,7 @@ resource "aws_security_group" "nat" {
 
   tags = {
     Name = "${var.app_name}-nat-gateway-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -126,7 +126,7 @@ resource "aws_network_interface" "nat" {
 
   tags = {
     Name = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -135,7 +135,7 @@ resource "aws_eip" "nat" {
   vpc = true
   tags = {
     Name = "${var.app_name}-eip-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -157,7 +157,7 @@ resource "aws_launch_template" "nat" {
 
   tags = {
     Name = "${var.app_name}-nat-gateway-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -212,7 +212,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
    tags = {
     Name = "${var.app_name}-route-table-private-${count.index}-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 

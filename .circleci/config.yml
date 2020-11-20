@@ -9,12 +9,9 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
-            export PROJECT_WORKSPACE=dev
-            printf "bucket = \"$TF_VAR_aws_bucket\" \nkey = \"$TF_VAR_aws_bucket_key\" \nregion = \"us-west-2\"" > backend.tfvars
+            export PROJECT_WORKSPACE=prod
+            printf "bucket = \"$PROJECT_WORKSPACE-$TF_BE_BUCKET\" \nkey = \"$TF_BE_BUCKET_KEY\" \nregion = \"us-west-2\"" > backend.tfvars
             terraform init -backend-config=backend.tfvars -input=false
-            if [[ $CIRCLE_BRANCH == "master" ]]; then
-               export PROJECT_WORKSPACE=prod
-            fi
             terraform workspace new $PROJECT_WORKSPACE || terraform workspace select $PROJECT_WORKSPACE
             terraform plan -out terraform.out
       - persist_to_workspace:
@@ -31,9 +28,10 @@ jobs:
           name: running tests compliance
           command: |
             apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
-            printf "bucket = \"$TF_VAR_aws_bucket\" \nkey = \"$TF_VAR_aws_bucket_key\" \nregion = \"us-west-2\"" > backend.tfvars
+            export PROJECT_WORKSPACE=tst
+            printf "bucket = \"$PROJECT_WORKSPACE-$TF_BE_BUCKET\" \nkey = \"$TF_BE_BUCKET_KEY\" \nregion = \"us-west-2\"" > backend.tfvars
             terraform init -backend-config=backend.tfvars
-            terraform workspace new tst || terraform workspace select tst
+            terraform workspace new $PROJECT_WORKSPACE || terraform workspace select $PROJECT_WORKSPACE
             terraform plan -out terraform.out
             pip install wheel
             pip install terraform-compliance
@@ -61,11 +59,8 @@ jobs:
       - run:
           name: terraform destroy
           command: |
-            export PROJECT_WORKSPACE=dev
+            export PROJECT_WORKSPACE=prod
             terraform init -input=false
-            if [[ $CIRCLE_BRANCH == "master" ]]; then
-                export PROJECT_WORKSPACE=prod
-            fi
             terraform workspace select $PROJECT_WORKSPACE
             terraform destroy -auto-approve
 

@@ -3,12 +3,11 @@ provider "aws" {
   region = var.aws_region
   version = "~> 3.4.0"
 }
+
 terraform {
   required_version = "~> 0.13.3"
   backend "s3" {}
 }
-
-
 
 module "vpc" {
   source = "./modules/vpc"

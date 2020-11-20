@@ -29,7 +29,7 @@ resource "aws_security_group" "alb" {
   }
   tags = {
     Name = "${var.app_name}-sg-alb-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 

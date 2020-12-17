@@ -93,7 +93,7 @@ resource "aws_ecs_task_definition" "main" {
       "logDriver": "awslogs",
       "options": {
           "awslogs-region" : var.aws_region,
-          "awslogs-group" : "/ecs/lcm-sayu-task-dev",
+          "awslogs-group" : "/ecs/lcm-sayu-task-${terraform.workspace}",
           "awslogs-stream-prefix" : "ecs"
       }
     }

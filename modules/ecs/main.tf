@@ -2,7 +2,7 @@
 resource "aws_security_group" "ecs_tasks" {
   name   = "${var.app_name}-sg-task-${terraform.workspace}"
   vpc_id = var.vpc_id
- 
+
   ingress {
    protocol         = "tcp"
    from_port        = var.container_port
@@ -10,7 +10,7 @@ resource "aws_security_group" "ecs_tasks" {
    cidr_blocks      = ["0.0.0.0/0"]
    ipv6_cidr_blocks = ["::/0"]
   }
- 
+
   egress {
    protocol         = "-1"
    from_port        = 0
@@ -24,7 +24,7 @@ resource "aws_security_group" "ecs_tasks" {
  # Create ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "${var.app_name}-cluster-${terraform.workspace}"
-  
+
   tags = {
     Name        = "${var.app_name}-cluster-${terraform.workspace}"
     Environment = terraform.workspace
@@ -33,7 +33,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.app_name}-ecsTaskExecutionRole-${terraform.workspace}"
- 
+
   assume_role_policy = <<EOF
 {
  "Version": "2012-10-17",
@@ -56,6 +56,14 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_cloudwatch_log_group" "ecs-log-group" {
+  name = "/ecs/lcm-sayu-task-dev-2"
+
+  tags = {
+    Name="/ecs/lcm-sayu-task-dev-2"
+    Environment = terraform.workspace
+  }
+}
 
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.app_name}-task-${terraform.workspace}"
@@ -93,7 +101,7 @@ resource "aws_ecs_task_definition" "main" {
       "logDriver": "awslogs",
       "options": {
           "awslogs-region" : var.aws_region,
-          "awslogs-group" : "/ecs/lcm-sayu-task-dev",
+          "awslogs-group" : "/ecs/lcm-sayu-task-dev-2",
           "awslogs-stream-prefix" : "ecs"
       }
     }

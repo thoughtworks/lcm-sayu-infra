@@ -57,14 +57,13 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
 }
 
 resource "aws_cloudwatch_log_group" "ecs-log-group" {
-  name = "/ecs/lcm-sayu-task-dev-2"
+  name = "/ecs/lcm-sayu-task-${terraform.workspace}"
 
   tags = {
-    Name="/ecs/lcm-sayu-task-dev-2"
+    Name="/ecs/lcm-sayu-task-${terraform.workspace}"
     Environment = terraform.workspace
   }
 }
-
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.app_name}-task-${terraform.workspace}"
   network_mode             = "awsvpc"
@@ -125,19 +124,19 @@ resource "aws_ecs_service" "main" {
  deployment_maximum_percent         = 200
  launch_type                        = "FARGATE"
  scheduling_strategy                = "REPLICA"
- 
+
  network_configuration {
    security_groups  = [aws_security_group.ecs_tasks.id]
    subnets          = var.private_subnets_ids
    assign_public_ip = false
  }
- 
+
  load_balancer {
    target_group_arn = var.aws_alb_target_group
    container_name   = "${var.app_name}-container-${terraform.workspace}"
    container_port   = var.container_port
  }
- 
+
  lifecycle {
    ignore_changes = [task_definition, desired_count]
  }

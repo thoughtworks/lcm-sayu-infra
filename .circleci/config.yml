@@ -50,19 +50,6 @@ jobs:
           root: .
           paths:
             - .
-  destroy:
-    docker:
-      - image: hashicorp/terraform:0.13.3
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: terraform destroy
-          command: |
-            export PROJECT_WORKSPACE=prod
-            terraform init -input=false
-            terraform workspace select $PROJECT_WORKSPACE
-            terraform destroy -auto-approve
 
 workflows:
   deploy_infrastructure:
@@ -98,20 +85,3 @@ workflows:
                 - dev
           requires:
             - approve-apply
-      - approve-destroy:
-          filters:
-            branches:
-              only:
-                - master
-                - dev
-          type: approval
-          requires:
-            - apply
-      - destroy:
-          filters:
-            branches:
-              only:
-                - master
-                - dev
-          requires:
-            - approve-destroy

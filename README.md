@@ -2,9 +2,15 @@
 
 ## How to login with AWS
 
-After to login in AWS with SAML2AWS, ensure to export the AWS_PROFILE in the console.
-- `export AWS_PROFILE=okta`
+The Project works with an AWS service account using the default AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
+## Considerations
+
+- The project works with an S3 [backend](https://www.terraform.io/docs/backends/index.html) to persist the terraform state
+- The S3 backend configuration is generated on the flight in the CI/CD Pipeline, with this variables TF_BE_BUCKET, TF_BE_BUCKET_KEY
+- The project has 2 workspaces
+ - tst: for e2e infrastructure testing.
+ - prod: Productive environment configuration.
 
 ## How to deploy the infrastructure
 

@@ -32,6 +32,22 @@ variable "container_image" {
   type = string
   description = "Container image"
 }
+variable "google_id" {
+  type = string
+  description = "Id of the sayu's google account"
+}
+variable "google_secret" {
+  type = string
+  description = "secret of the sayu's google account"
+}
+variable "secret" {
+  type = string
+  description = "secret to encrypt session"
+}
+variable "nextauth_url" {
+  type = string
+  description = "Production URL"
+}
 
 variable "container_cpu" {}
 variable "container_memory" {}

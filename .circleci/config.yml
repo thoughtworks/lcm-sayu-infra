@@ -3,17 +3,15 @@ jobs:
   plan-apply:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - checkout
       - run:
           name: terraform init & plan
           command: |
-            export PROJECT_WORKSPACE=dev
-            terraform init -input=false
-            if [[ $CIRCLE_BRANCH == "master" ]]; then
-               export PROJECT_WORKSPACE=prod
-            fi
+            export PROJECT_WORKSPACE=prod
+            printf "bucket = \"$PROJECT_WORKSPACE-$TF_BE_BUCKET\" \nkey = \"$TF_BE_BUCKET_KEY\" \nregion = \"us-west-2\"" > backend.tfvars
+            terraform init -backend-config=backend.tfvars -input=false
             terraform workspace new $PROJECT_WORKSPACE || terraform workspace select $PROJECT_WORKSPACE
             terraform plan -out terraform.out
       - persist_to_workspace:
@@ -23,22 +21,24 @@ jobs:
   run-tests:
     working_directory: ~/lcm-sayu-infra
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - checkout
       - run:
           name: running tests compliance
           command: |
             apk add py3-pip g++ gcc libxml2-dev libxslt-dev libc-dev python3-dev
-            terraform init
-            terraform workspace new tst || terraform workspace select tst
+            export PROJECT_WORKSPACE=tst
+            printf "bucket = \"$PROJECT_WORKSPACE-$TF_BE_BUCKET\" \nkey = \"$TF_BE_BUCKET_KEY\" \nregion = \"us-west-2\"" > backend.tfvars
+            terraform init -backend-config=backend.tfvars
+            terraform workspace new $PROJECT_WORKSPACE || terraform workspace select $PROJECT_WORKSPACE
             terraform plan -out terraform.out
-            pip install wheel 
+            pip install wheel
             pip install terraform-compliance
             terraform-compliance -p terraform.out -f tests
   apply:
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - attach_workspace:
           at: .
@@ -52,18 +52,15 @@ jobs:
             - .
   destroy:
     docker:
-      - image: hashicorp/terraform:light
+      - image: hashicorp/terraform:0.13.3
     steps:
       - attach_workspace:
           at: .
       - run:
           name: terraform destroy
           command: |
-            export PROJECT_WORKSPACE=dev
+            export PROJECT_WORKSPACE=prod
             terraform init -input=false
-            if [[ $CIRCLE_BRANCH == "master" ]]; then
-                export PROJECT_WORKSPACE=prod
-            fi
             terraform workspace select $PROJECT_WORKSPACE
             terraform destroy -auto-approve
 
@@ -84,6 +81,15 @@ workflows:
                 - dev
           requires:
             - run-tests
+      - approve-apply:
+          filters:
+            branches:
+              only:
+                - master
+                - dev
+          type: approval
+          requires:
+            - plan-apply
       - apply:
           filters:
             branches:
@@ -91,7 +97,7 @@ workflows:
                 - master
                 - dev
           requires:
-            - plan-apply
+            - approve-apply
       - approve-destroy:
           filters:
             branches:

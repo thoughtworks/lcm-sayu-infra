@@ -58,6 +58,7 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
 
 resource "aws_cloudwatch_log_group" "ecs-log-group" {
   name = "/ecs/lcm-sayu-task-${terraform.workspace}"
+  retention_in_days = 30
 
   tags = {
     Name="/ecs/lcm-sayu-task-${terraform.workspace}"

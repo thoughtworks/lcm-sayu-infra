@@ -16,6 +16,7 @@ module "vpc" {
   public_subnets = var.public_subnets
   private_subnets = var.private_subnets
   availability_zones = var.availability_zones
+  security_group_ecs_task = module.ecs.security_group_ecs_task
 }
 
 module "alb" {

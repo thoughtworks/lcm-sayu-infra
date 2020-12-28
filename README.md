@@ -4,10 +4,11 @@
 
 El proyecto funciona con una cuenta de servicio de AWS. Terraform utilizará estas variable de ambiente AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, y sus valores deben hacer referencia al access key id y al secret access key de la cuenta de servicio.
 
-## Considerations
+## Consideraciones
 
+- Se debe crear manualmente el bucket S3.
 - Este proyecto funciona con S3 [backend](https://www.terraform.io/docs/backends/index.html) para guardar el estado de terraform
-- La configuración del S3 backend es generada durante la ejecución del pipeline con estas variables TF_BE_BUCKET, TF_BE_BUCKET_KEY
+- Una vez creado el bucket de forma manual, la configuración de la conexión al bucket se realiza durante la ejecución del pipeline con estas variables de entorno: TF_BE_BUCKET, TF_BE_BUCKET_KEY
 - El proyecto tiene dos workspace:
 - tst: para pruebas de infraestructura e2e
 - prod: configuración de entorno de producción
@@ -32,13 +33,13 @@ El proyecto funciona con una cuenta de servicio de AWS. Terraform utilizará est
 
 ### En el pipeline
 
-- Siempre ejecutará una init al final de cada job
+- Siempre ejecutará un init en cada job
 
 ## Sobre las pruebas
 
 Para probar la infraestructura se usa [terraform-compliance](https://terraform-compliance.com/).
 
-### About terraform compliance (Sobre el cumplimiento de normas de Terraform?)
+### Sobre el cumplimiento de normas de Terraform
 
 `terraform-compliance` es un marco de prueba ligero, centrado en la seguridad y el cumplimiento contra terraform para permitir la capacidad de prueba negativa para su infraestructura como código.
 
@@ -55,9 +56,11 @@ Para probar la infraestructura se usa [terraform-compliance](https://terraform-c
 
 ## Sobre los entornos
 
-Para diferentes entornos, usamos:
+Para diferentes entornos, usamos workspaces
 
 Ex: para entorno de desarrollo usamos el workspace "dev"
+
+### El pipeline usa dos entornos: tst y prod
 
 - **Crear nuevo workspace:**
 

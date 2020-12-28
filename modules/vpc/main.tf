@@ -249,3 +249,32 @@ resource "aws_route53_record" "www" {
     evaluate_target_health = true
   }
 }
+
+# Certificate configuration
+resource "aws_acm_certificate" "sayu_cert" {
+  domain_name       = "*.misayu.cl"
+  validation_method = "DNS"
+
+  tags = {
+     Name = "${var.app_name}-aws-acm-certificate-sayu-cert-${terraform.workspace}"
+    Environment = terraform.workspace
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "sayu_cert_validation_record" {
+  allow_overwrite = true
+  name            =  tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_name
+  records         = [ tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_value ]
+  ttl             = 60
+  type            = tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_type
+  zone_id         = aws_route53_zone.public.zone_id
+}
+
+resource "aws_acm_certificate_validation" "sayu_cert_validation" {
+  certificate_arn         = aws_acm_certificate.sayu_cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.sayu_cert : record.fqdn]
+}

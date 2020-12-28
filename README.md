@@ -1,72 +1,76 @@
-# Pain Control Infrastructure
+# Infraestructura de sayu
 
-## How to login with AWS
+## Cómo hacer login en AWS
 
-The Project works with an AWS service account using the default AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+El proyecto funciona con una cuenta de servicio de AWS. Terraform utilizará estas variable de ambiente AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, y sus valores deben hacer referencia al access key id y al secret access key de la cuenta de servicio.
 
 ## Considerations
 
-- The project works with an S3 [backend](https://www.terraform.io/docs/backends/index.html) to persist the terraform state
-- The S3 backend configuration is generated on the flight in the CI/CD Pipeline, with this variables TF_BE_BUCKET, TF_BE_BUCKET_KEY
-- The project has 2 workspaces
- - tst: for e2e infrastructure testing.
- - prod: Productive environment configuration.
+- Este proyecto funciona con S3 [backend](https://www.terraform.io/docs/backends/index.html) para guardar el estado de terraform
+- La configuración del S3 backend es generada durante la ejecución del pipeline con estas variables TF_BE_BUCKET, TF_BE_BUCKET_KEY
+- El proyecto tiene dos workspace:
+- tst: para pruebas de infraestructura e2e
+- prod: configuración de entorno de producción
 
-## How to deploy the infrastructure
+## Cómo desplegar la infraestructura
 
-### Initialize the project (just once)
+### Inicializar el proyecto (solo una vez)
 
-- `terraform init`: Initialize the terraform project (download providers, establish connection to the cloud project)
+- `terraform init`: Inicializa el proyecto de terraform (descarga proveedores, establece conexión con el proyecto en la nube)
 
-### With every change in the terraform code
+### Con cada cambio en el código de Terraform
 
-- `terraform validate`: Validate the code syntax
+- `terraform validate`: valida la sintaxis del código
 
-- `terraform plan`: Diff between state and current code
+- `terraform plan`: busca las diferencias entre el estado y el código actual
 
-- `terraform apply`: Take the plan and execute the changes in the cloud
+- `terraform apply`: toma el plan y ejecuta los cambios en la nube
 
-### Destroy infrastructure
+### Destruir la Infraestructura
 
-- `terraform destroy`: Go to the state and destroys all the infrastructure that is in the state
+- `terraform destroy`: va al estado y destruye toda la infraestructura que se encuentra ahí.
 
+### En el pipeline
 
+- Siempre ejecutará una init al final de cada job
 
-## About testing 
-For testing the infrastructure we use the [terraform-compliance](https://terraform-compliance.com/). 
+## Sobre las pruebas
 
-### About terraform compliance
-`terraform-compliance` is a lightweight, security and compliance focused test framework against terraform to enable negative testing capability for your infrastructure-as-code.
+Para probar la infraestructura se usa [terraform-compliance](https://terraform-compliance.com/).
 
-#### Instructions to run test using the library
+### About terraform compliance (Sobre el cumplimiento de normas de Terraform?)
 
-- __Install the library:__ Ensure to install the library by `pip` or `docker`
-- __Plan as Json:__ Ensure to save the terraform plan as json
-    1. `terraform plan -out terraform.out`
-    2. `terraform show -json terraform.out > plan.json`
+`terraform-compliance` es un marco de prueba ligero, centrado en la seguridad y el cumplimiento contra terraform para permitir la capacidad de prueba negativa para su infraestructura como código.
 
-- __Run test:__  Now, you will run the tests in the folder to test: Ex: tests
-    1. `terraform-compliance -p plan.json -f tests`
+#### Instrucciones para correr las pruebas usando la librería
 
+- **Instalar la librería:** asegúrese de instalar la librería `pip` o `docker`
+- **Plan as Json:** asegúrese de guardar el plan de Terraform como un json
 
-## About environments
-For different environments, we use workspaces:
+  1. `terraform plan -out terraform.out`
+  2. `terraform show -json terraform.out > plan.json`
 
-Ex: to dev environment we use workspace "dev"
+- **Ejecutar las pruebas:** Las pruebas se ejecutan en la carpeta de pruebas. Ej: tests
+  1. `terraform-compliance -p plan.json -f tests`
 
-- __Create new workspace:__  
+## Sobre los entornos
 
-    1. `terraform workspace new dev`
+Para diferentes entornos, usamos:
 
-- __Select workspace created:__ 
+Ex: para entorno de desarrollo usamos el workspace "dev"
 
-    2. `terraform workspace select dev`
+- **Crear nuevo workspace:**
 
-- __Execute plan:__ 
+  1. `terraform workspace new dev`
 
-    3. `terraform plan -workspace=dev`
+- **Seleccionar workspace creado:**
 
-- __Execute apply:__ 
+  2. `terraform workspace select dev`
 
-    4. `terraform apply -workspace=dev`
+- **Ejecutar plan:**
 
+  3. `terraform plan -workspace=dev`
+
+- **Ejecutar aplicación de plan:**
+
+  4. `terraform apply -workspace=dev`

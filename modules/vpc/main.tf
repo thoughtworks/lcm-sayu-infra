@@ -248,9 +248,4 @@ resource "aws_route53_record" "www" {
     zone_id                = var.aws_alb_zone_id
     evaluate_target_health = true
   }
-
-  tags = {
-    Name = "${var.app_name}-aws-route53-record-www-${terraform.workspace}"
-    Environment = terraform.workspace
-  }
 }

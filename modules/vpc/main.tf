@@ -266,6 +266,7 @@ resource "aws_acm_certificate" "sayu_cert" {
 }
 
 resource "aws_route53_record" "sayu_cert_validation_record" {
+  count = 1
   allow_overwrite = true
   name            =  tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_name
   records         = [ tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_value ]
@@ -278,5 +279,5 @@ resource "aws_acm_certificate_validation" "sayu_cert_validation" {
   depends_on = [aws_acm_certificate.sayu_cert, aws_route53_record.sayu_cert_validation_record]
 
   certificate_arn         = aws_acm_certificate.sayu_cert.arn
-  validation_record_fqdns = [ aws_route53_record.sayu_cert_validation_record.fqdn ]
+  validation_record_fqdns = [ for record in aws_route53_record.sayu_cert_validation_record : record.fqdn ]
 }

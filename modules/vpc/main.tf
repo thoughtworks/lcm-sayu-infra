@@ -278,5 +278,5 @@ resource "aws_acm_certificate_validation" "sayu_cert_validation" {
   depends_on = [aws_acm_certificate.sayu_cert, aws_route53_record.sayu_cert_validation_record]
 
   certificate_arn         = aws_acm_certificate.sayu_cert.arn
-  validation_record_fqdns = [ for record in aws_route53_record.sayu_cert_validation_record : record.fqdn ]
+  validation_record_fqdns = [ aws_route53_record.sayu_cert_validation_record[0].fqdn ]
 }

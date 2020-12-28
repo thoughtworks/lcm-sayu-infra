@@ -17,7 +17,6 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-
 # Public Subnet
 resource "aws_subnet" "public" {
   count                   = length(lookup(var.public_subnets, terraform.workspace))
@@ -227,4 +226,31 @@ resource "aws_route_table_association" "private" {
   count          = length(lookup(var.private_subnets, terraform.workspace))
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
+}
+
+# DNS
+resource "aws_route53_zone" "public" {
+  name = "misayu.cl"
+
+  tags = {
+    Name = "${var.app_name}-aws-route53-zone-public-${terraform.workspace}"
+    Environment = terraform.workspace
+  }
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = aws_route53_zone.public.zone_id
+  name    = "www.misayu.cl"
+  type    = "A"
+
+  alias {
+    name                   = var.aws_alb_dns_name
+    zone_id                = var.aws_alb_zone_id
+    evaluate_target_health = true
+  }
+
+  tags = {
+    Name = "${var.app_name}-aws-route53-record-www-${terraform.workspace}"
+    Environment = terraform.workspace
+  }
 }

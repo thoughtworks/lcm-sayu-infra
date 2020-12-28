@@ -17,6 +17,8 @@ module "vpc" {
   private_subnets = var.private_subnets
   availability_zones = var.availability_zones
   security_group_ecs_task = module.ecs.security_group_ecs_task
+  aws_alb_dns_name = module.alb.aws_alb_dns_name
+  aws_alb_zone_id = module.alb.aws_alb_zone_id
 }
 
 module "alb" {

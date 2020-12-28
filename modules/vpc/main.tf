@@ -237,3 +237,20 @@ resource "aws_route53_zone" "public" {
     Environment = terraform.workspace
   }
 }
+
+resource "aws_route53_record" "www" {
+  zone_id = aws_route53_zone.public.zone_id
+  name    = "www.misayu.cl"
+  type    = "A"
+
+  alias {
+    name                   = var.aws_alb_dns_name
+    zone_id                = var.aws_alb_zone_id
+    evaluate_target_health = true
+  }
+
+  tags = {
+    Name = "${var.app_name}-aws-route53-record-www-${terraform.workspace}"
+    Environment = terraform.workspace
+  }
+}

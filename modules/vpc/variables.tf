@@ -23,3 +23,7 @@ variable "nat_gateway_instance_types" {
 }
 
 variable "security_group_ecs_task" {}
+
+variable "aws_alb_dns_name" {}
+
+variable "aws_alb_zone_id" {}

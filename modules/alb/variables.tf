@@ -16,3 +16,7 @@ variable "health_check_path" {
   description = "Http path for task health check"
   default     = "/"
 }
+
+variable "certificate_arn" {
+  description = "Certificate arn created in vpc"
+}

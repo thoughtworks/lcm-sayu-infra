@@ -30,6 +30,7 @@ module "alb" {
   vpc_id = module.vpc.vpc_id
   private_subnets_ids = module.vpc.private_subnets_ids
   public_subnets_ids = module.vpc.public_subnets_ids
+  certificate_arn = module.vpc.certicate_arn
 }
 
 module "ecr" {

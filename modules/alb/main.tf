@@ -91,3 +91,4 @@ resource "aws_lb_listener" "https" {
     type             = "forward"
     target_group_arn = aws_alb_target_group.main.id
   }
+}

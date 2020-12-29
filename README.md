@@ -15,25 +15,31 @@ El proyecto funciona con una cuenta de servicio de AWS. Terraform utilizará est
 
 ## Cómo desplegar la infraestructura
 
-### Inicializar el proyecto (solo una vez)
+### En computador local
+
+#### Inicializar el proyecto (solo una vez)
 
 - `terraform init`: Inicializa el proyecto de terraform (descarga proveedores, establece conexión con el proyecto en la nube)
 
-### Con cada cambio en el código de Terraform
+#### Con cada cambio en el código de Terraform
 
 - `terraform validate`: valida la sintaxis del código
 
-- `terraform plan`: busca las diferencias entre el estado y el código actual
+- `terraform plan`: busca las diferencias entre el estado y el código actual (verifique que el plan sea consistente con los cambios que quiera hacer)
 
 - `terraform apply`: toma el plan y ejecuta los cambios en la nube
 
-### Destruir la Infraestructura
+#### Destruir la Infraestructura
 
 - `terraform destroy`: va al estado y destruye toda la infraestructura que se encuentra ahí.
 
 ### En el pipeline
 
-- Siempre ejecutará un init en cada job
+- La herramienta de CI/CD utilizada es CircleCi que lee el archivo [.circleci/config.yml](/.circleci/config.yml) para generar un workflow (pipeline)
+- CircleCi siempre ejecutará un init en cada job
+- Cuando se ejecute el job `plan-apply` genere el plan de terraform, se detendrá el workflow y esperará por una aprobación manual (verifique que el plan sea consistente con los cambios que quiera hacer)
+- Las variables de ambiente `AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY` deben estar disponibles y con sus valores correctos dentro de la configuración del proyecto en CircleCi ([ver más arriba](#cómo-hacer-login-en-aws))
+- Por supuesto que se puede utilizar cualquier otra herramienta de CI/CD realizando los cambios necesarios
 
 ## Sobre las pruebas
 
@@ -52,15 +58,18 @@ Para probar la infraestructura se usa [terraform-compliance](https://terraform-c
   2. `terraform show -json terraform.out > plan.json`
 
 - **Ejecutar las pruebas:** Las pruebas se ejecutan en la carpeta de pruebas. Ej: tests
+
   1. `terraform-compliance -p plan.json -f tests`
+
+- En el pipeline existe un job `run-tests` que configura el ambiente y ejecuta las pruebas `terraform-compliance`
 
 ## Sobre los entornos
 
 Para diferentes entornos, usamos workspaces
 
-Ex: para entorno de desarrollo usamos el workspace "dev"
-
 ### El pipeline usa dos entornos: tst y prod
+
+### Si se necesita de un entorno adicional:
 
 - **Crear nuevo workspace:**
 
@@ -77,3 +86,5 @@ Ex: para entorno de desarrollo usamos el workspace "dev"
 - **Ejecutar aplicación de plan:**
 
   4. `terraform apply -workspace=dev`
+
+- Modificar pipeline de acuerdo a la existencia de un nuevo workspace (ej.: `if [[ $CIRCLE_BRANCH == "new_branch" ]]; then PROJECT_WORKSPACE=new_workspace`)

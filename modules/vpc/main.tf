@@ -238,9 +238,14 @@ resource "aws_route53_zone" "public" {
   }
 }
 
-resource "aws_route53_record" "www" {
+locals {
+  domains = ["www.misayu.cl", "misayu.cl"]
+}
+
+resource "aws_route53_record" "domains_alias" {
+  count = lenght(local.domains)
   zone_id = aws_route53_zone.public.zone_id
-  name    = "www.misayu.cl"
+  name    = local.domains[count.index]
   type    = "A"
 
   alias {

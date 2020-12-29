@@ -259,6 +259,7 @@ resource "aws_route53_record" "domains_alias" {
 resource "aws_acm_certificate" "sayu_cert" {
   domain_name       = "*.misayu.cl"
   validation_method = "DNS"
+  subject_alternative_names = ["misayu.cl"]
 
   tags = {
      Name = "${var.app_name}-aws-acm-certificate-sayu-cert-${terraform.workspace}"

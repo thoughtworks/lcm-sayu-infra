@@ -272,12 +272,11 @@ resource "aws_acm_certificate" "sayu_cert" {
 }
 
 resource "aws_route53_record" "sayu_cert_validation_record" {
-  count = 2
   allow_overwrite = true
-  name            =  tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[count.index].resource_record_name
-  records         = [ tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[count.index].resource_record_value ]
+  name            =  tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_name
+  records         = [ tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_value ]
   ttl             = 60
-  type            = tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[count.index].resource_record_type
+  type            = tolist(aws_acm_certificate.sayu_cert.domain_validation_options)[0].resource_record_type
   zone_id         = aws_route53_zone.public.zone_id
 }
 

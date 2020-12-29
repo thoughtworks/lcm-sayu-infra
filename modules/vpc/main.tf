@@ -243,7 +243,7 @@ locals {
 }
 
 resource "aws_route53_record" "domains_alias" {
-  count = lenght(local.domains)
+  count = length(local.domains)
   zone_id = aws_route53_zone.public.zone_id
   name    = local.domains[count.index]
   type    = "A"

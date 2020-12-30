@@ -11,13 +11,12 @@ resource "aws_db_instance" "rds" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   deletion_protection    = true
+  backup_retention_period = 5
+  backup_window  = "04:00-05:00"
   tags = {
     Environment = terraform.workspace
   }
 }
-
-
-
 
 /* subnet used by rds */
 resource "aws_db_subnet_group" "rds_subnet_group" {
